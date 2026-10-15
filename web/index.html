@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thunderden browser prototype</title>
+<style>
+  :root { color-scheme: dark; font: 16px system-ui, sans-serif; background: #191a18; color: #efefe9; }
+  body { max-width: 1280px; margin: 24px auto; padding: 0 16px; }
+  h1 { font-size: 1.5rem; margin-bottom: 8px; }
+  .warning { color: #ffb950; }
+  button { padding: 10px 18px; margin: 0 8px 8px 0; font: inherit; cursor: pointer; }
+  #boot { background: #f7931a; color: #191a18; border: 0; border-radius: 4px; }
+  button:disabled { opacity: .5; cursor: default; }
+  #screen { display: block; width: 100%; height: auto; background: #000; border: 2px solid #555; image-rendering: pixelated; }
+  #screen:focus { outline: 2px solid #f7931a; outline-offset: 3px; }
+  #status, .hint { color: #b5b5ad; }
+  #log { white-space: pre-wrap; overflow-wrap: anywhere; }
+</style>
+<h1>Thunderden browser prototype</h1>
+<p class="warning"><strong>Demo only.</strong> Never enter real recovery words or fund a wallet generated here.</p>
+<p>Boots the original preview.8 image locally in your browser. Nothing is added to the guest.</p>
+<button id="boot">Boot Thunderden</button>
+<button id="restart" disabled>Restart / clear demo</button>
+<p id="status" role="status">Ready. The first boot may take several minutes.</p>
+<canvas id="screen" width="1280" height="800" tabindex="0" aria-label="Thunderden virtual computer screen"></canvas>
+<p class="hint">Click the screen to focus it, then use your keyboard: arrows, Enter, Esc and typing. US keyboard layout. Camera capture is not connected yet.</p>
+<details><summary>Emulator diagnostics</summary><pre id="log"></pre></details>
+<script type="module" src="./app.js"></script>
+</html>
