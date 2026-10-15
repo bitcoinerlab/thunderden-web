@@ -13,7 +13,8 @@
   button:disabled { opacity: .5; cursor: default; }
   #screen { display: block; width: 100%; height: auto; background: #000; border: 2px solid #555; image-rendering: pixelated; }
   #screen:focus { outline: 2px solid #f7931a; outline-offset: 3px; }
-  #status, .hint { color: #b5b5ad; }
+  #status, #camera-status, .hint { color: #b5b5ad; }
+  #camera-video { max-width: 240px; max-height: 180px; margin-bottom: 12px; }
   #log { white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>
 <h1>Thunderden browser prototype</h1>
@@ -21,9 +22,12 @@
 <p>Boots the original preview.8 image locally in your browser. Nothing is added to the guest.</p>
 <button id="boot">Boot Thunderden</button>
 <button id="restart" disabled>Restart / clear demo</button>
+<button id="camera" disabled>Enable camera</button>
+<p id="camera-status" role="status">Camera off.</p>
+<video id="camera-video" autoplay muted playsinline hidden aria-label="Local camera preview"></video>
 <p id="status" role="status">Ready. The first boot may take several minutes.</p>
 <canvas id="screen" width="1280" height="800" tabindex="0" aria-label="Thunderden virtual computer screen"></canvas>
-<p class="hint">Click the screen to focus it, then use your keyboard: arrows, Enter, Esc and typing. US keyboard layout. Camera capture is not connected yet.</p>
+<p class="hint">Click the screen to focus it, then use your keyboard: arrows, Enter, Esc and typing. US keyboard layout. Enable and allow the camera before starting a scan in Thunderden.</p>
 <details><summary>Emulator diagnostics</summary><pre id="log"></pre></details>
 <script type="module" src="./app.js"></script>
 </html>

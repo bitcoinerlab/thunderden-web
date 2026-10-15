@@ -24,6 +24,13 @@ Thunderden**. Click the screen to focus it, then use the arrows, Enter, Esc and
 normal typing. Keyboard mapping currently assumes the guest's US layout.
 **Restart / clear demo** reloads the page and discards the emulated computer.
 
+For QR scanning, click **Enable camera** above the virtual screen and allow the
+browser's camera request **before** starting a scan inside Thunderden. A small
+local preview confirms which camera is active. Then use Thunderden's normal
+**Scan a QR code** flow with public test recovery words. **Stop camera** releases
+the device and replaces the latest host camera frame with black. Frames already
+buffered by the emulator or guest may still be delivered. No microphone is requested.
+
 Setup copies the generated emulator assets and downloads the original preview.8
 image. Its SHA-256 is checked both during setup and in the browser before boot.
 To reuse a previously downloaded release, run `npm run setup -- /path/to/thunderden.img`.
@@ -34,9 +41,14 @@ Other machines may take longer, particularly on the first startup.
 The development server binds only to localhost and supplies the COOP/COEP headers
 needed by the threaded emulator. No backend VM or native browser extension is used.
 
-**Not yet connected:** real webcam capture. Browser recovery-word generation and
-macOS/Safari/Firefox compatibility still require validation. Do not use this
-prototype with real wallet material.
+Physical webcam scanning, animated QR streams, browser recovery-word generation,
+camera entropy/NIST timing, and macOS/Safari/Firefox compatibility still require
+validation. Do not use this prototype with real wallet material.
+
+Camera access requires HTTPS or localhost and permission from the browser and
+operating system. If access is denied or the device is busy, check those
+permissions, close other camera applications and retry. Video is processed locally
+in the browser and is not uploaded.
 
 ## Emulator integration
 
@@ -50,10 +62,13 @@ inserted into the Thunderden guest. Its QR decoder and process isolation remain
 the original implementations. This does **not** make a browser an airgapped device.
 
 Current work is a development prototype, not a deployed or verified browser signer.
-The native emulator has scanned a virtual USB webcam and verified a public fixture
-address using the unchanged preview.8 release image. The Wasm binary builds and
-starts with the USB camera and RNG device in Chromium. The page uses QEMU's own
-QMP screen-dump and keyboard commands to present and control the original guest;
+Both native emulation and Chromium on Linux have scanned a virtual USB webcam and
+verified a public fixture address using the unchanged preview.8 release image.
+The browser check uses a synthetic webcam through the real `getUserMedia()` API,
+not a physical camera. The website uses a virtual USB 2 EHCI controller; xHCI
+registered correctly but the guest camera scanner timed out in Wasm.
+The page uses QEMU's own QMP screen-dump and keyboard commands to present and
+control the original guest;
 there is no alternate UI or application injected inside the image. This initial
 display path favors a small, inspectable prototype over high frame rates.
 The image is attached as a read-only virtio boot disk. An IDE/snapshot configuration
@@ -78,5 +93,18 @@ python3 tests/browser-boot.py /path/to/test-output --chromium /path/to/chromium
 It reads the actual rendered guest screen and navigates menus through browser
 keyboard events. On 2026-10-15 it passed the original release boot, selection of
 Regtest, navigation into the public-key menu and Escape back to the main menu.
-No recovery words are entered. Browser hosting requires HTTPS
-(or localhost), and live camera capture will require explicit camera permission.
+No recovery words are entered by this boot test. Browser hosting requires HTTPS
+(or localhost), and live camera capture requires explicit camera permission.
+
+A separate camera test uses Chromium's fake webcam to show a known QR through
+the real `getUserMedia()` and canvas APIs. It tests denied permission/retry, the
+original image's UVC scanner and public fixture address verification, and camera
+stop/restart/disconnection handling. It needs `ffmpeg` and `qrencode` in addition
+to the boot-test tools:
+
+```sh
+python3 tests/browser-camera.py /path/to/camera-test-output --chromium /path/to/chromium
+```
+
+This camera test enters only the public `abandon`/`about` BIP39 fixture; it does
+not access a physical webcam or use real wallet material.

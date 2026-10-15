@@ -29,3 +29,89 @@ export function publishFrame(fs, frame) {
   fs.writeFile(`${FRAME_PATH}.next`, frame);
   fs.rename(`${FRAME_PATH}.next`, FRAME_PATH);
 }
+
+export function clearCameraFrame(fs) {
+  const frame = new Uint8Array(FRAME_BYTES).fill(128);
+  for (let i = 0; i < frame.length; i += 2) frame[i] = 16;
+  publishFrame(fs, frame);
+}
+
+// Capture the local camera through the browser's media API.
+// Pixels stay in the browser and enter the emulator through its host filesystem.
+export async function startCamera(fs, video, onError) {
+  if (!globalThis.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+    throw new Error('Camera access requires HTTPS or localhost.');
+  }
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: {
+      width: { ideal: WIDTH }, height: { ideal: HEIGHT },
+      aspectRatio: { ideal: WIDTH / HEIGHT },
+      frameRate: { ideal: 10 }, facingMode: { ideal: 'environment' },
+    },
+  });
+  const canvas = document.createElement('canvas');
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  const output = new Uint8Array(FRAME_BYTES);
+  let timer;
+  let stopped = false;
+
+  function stop() {
+    if (stopped) return;
+    stopped = true;
+    clearTimeout(timer);
+    window.removeEventListener('pagehide', stop);
+    for (const track of stream.getTracks()) {
+      track.removeEventListener('ended', disconnected);
+      track.stop();
+    }
+    video.pause();
+    video.srcObject = null;
+    clearCameraFrame(fs); // Replace the latest host frame instead of retaining its QR.
+  }
+
+  function disconnected() {
+    stop();
+    onError(new Error('Camera disconnected. Reconnect it and enable the camera again.'));
+  }
+
+  function capture() {
+    if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) return;
+    const scale = Math.min(WIDTH / video.videoWidth, HEIGHT / video.videoHeight);
+    const width = video.videoWidth * scale;
+    const height = video.videoHeight * scale;
+    context.fillStyle = '#000';
+    context.fillRect(0, 0, WIDTH, HEIGHT);
+    context.drawImage(video, (WIDTH - width) / 2, (HEIGHT - height) / 2, width, height);
+    rgbaToYuyv(context.getImageData(0, 0, WIDTH, HEIGHT).data, output);
+    publishFrame(fs, output);
+  }
+
+  function tick() {
+    if (stopped) return;
+    try {
+      capture();
+      timer = setTimeout(tick, 100);
+    } catch (error) {
+      stop();
+      onError(error);
+    }
+  }
+
+  try {
+    for (const track of stream.getVideoTracks()) track.addEventListener('ended', disconnected);
+    window.addEventListener('pagehide', stop);
+    video.muted = true;
+    video.srcObject = stream;
+    await video.play();
+    if (stopped) throw new Error('Camera stopped during startup. Try enabling it again.');
+    capture();
+    timer = setTimeout(tick, 100);
+    return stop;
+  } catch (error) {
+    stop();
+    throw error;
+  }
+}

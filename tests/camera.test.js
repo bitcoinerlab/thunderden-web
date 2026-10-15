@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { FRAME_BYTES, FRAME_PATH, publishFrame, rgbaToYuyv } from '../web/camera.js';
+import { FRAME_BYTES, FRAME_PATH, clearCameraFrame, publishFrame, rgbaToYuyv } from '../web/camera.js';
 
 test('black and white have neutral chroma and video-range luminance', () => {
   assert.deepEqual(rgbaToYuyv(Uint8Array.of(0, 0, 0, 255, 255, 255, 255, 255)),
@@ -36,4 +36,11 @@ test('publish only complete frames, using atomic replacement', () => {
     ['write', `${FRAME_PATH}.next`, frame],
     ['rename', `${FRAME_PATH}.next`, FRAME_PATH],
   ]);
+});
+
+test('clearing the camera publishes video black rather than retaining the last QR', () => {
+  let frame;
+  clearCameraFrame({ writeFile: (_, bytes) => { frame = bytes; }, rename() {} });
+  assert.equal(frame.length, FRAME_BYTES);
+  assert.equal(frame.every((byte, index) => byte === (index % 2 ? 128 : 16)), true);
 });

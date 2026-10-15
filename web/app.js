@@ -1,4 +1,4 @@
-import { FRAME_BYTES, publishFrame } from './camera.js';
+import { clearCameraFrame, startCamera } from './camera.js';
 import { qcode, readPpm } from './display.js';
 import { Qmp } from './qmp.js';
 import { RELEASE } from './release.js';
@@ -9,13 +9,38 @@ const status = document.querySelector('#status');
 const boot = document.querySelector('#boot');
 const restart = document.querySelector('#restart');
 const log = document.querySelector('#log');
+const cameraButton = document.querySelector('#camera');
+const cameraStatus = document.querySelector('#camera-status');
+const cameraVideo = document.querySelector('#camera-video');
 const pressed = new Set();
 let qmp;
 let running = false;
 let pixels;
+let emulator;
+let stopCamera;
+
+function cameraOff() {
+  stopCamera?.();
+  stopCamera = undefined;
+  cameraVideo.hidden = true;
+  cameraButton.textContent = 'Enable camera';
+  cameraStatus.textContent = 'Camera off.';
+}
+
+function cameraError(error) {
+  cameraOff();
+  const messages = {
+    NotAllowedError: 'Camera permission denied. Allow camera access for this site in your browser and OS settings, then retry.',
+    NotFoundError: 'No camera found.',
+    NotReadableError: 'Camera is busy or blocked by the OS. Close other camera apps and retry.',
+  };
+  cameraStatus.textContent = messages[error.name] ?? `Camera error: ${error.message}`;
+}
 
 function fail(error) {
   running = false;
+  cameraOff();
+  cameraButton.disabled = true;
   status.textContent = `Stopped: ${error.message ?? error}. See emulator diagnostics below. Restart to try again.`;
   log.textContent += String(error.message ?? error) + '\n';
   restart.disabled = false;
@@ -74,17 +99,16 @@ boot.addEventListener('click', async () => {
         '-L', '/bios', '-display', 'none', '-S', '-nic', 'none', '-no-reboot',
         '-drive', 'file=/thunderden.img,format=raw,if=virtio,readonly=on',
         '-vga', 'none', '-device', 'VGA,xres=1280,yres=800',
-        '-device', 'virtio-rng-pci', '-device', 'qemu-xhci,id=xhci',
+        // EHCI passed guest camera scanning in Wasm; xHCI timed out.
+        '-device', 'virtio-rng-pci', '-device', 'usb-ehci,id=ehci',
         '-videodev', 'frame-file,id=cam0,path=/camera.yuyv',
-        '-device', 'usb-video,bus=xhci.0,videodev=cam0', '-qmp', 'stdio',
+        '-device', 'usb-video,bus=ehci.0,videodev=cam0', '-qmp', 'stdio',
       ],
       preRun: [instance => {
         instance.FS.mkdir('/bios');
         for (const [name, bytes] of bios) instance.FS.writeFile('/bios/' + name, bytes);
         instance.FS.writeFile('/thunderden.img', image);
-        const blank = new Uint8Array(FRAME_BYTES).fill(128);
-        for (let i = 0; i < blank.length; i += 2) blank[i] = 16;
-        publishFrame(instance.FS, blank);
+        clearCameraFrame(instance.FS);
       }],
       print: line => { log.textContent += line + '\n'; },
       printErr: line => { log.textContent += line + '\n'; },
@@ -96,11 +120,33 @@ boot.addEventListener('click', async () => {
     ]);
     await qmp.command('qmp_capabilities');
     running = true;
+    emulator = module;
+    cameraButton.disabled = false;
     status.textContent = `Booting unchanged Thunderden ${RELEASE.tag}. Click the screen to use the keyboard; boot can take several minutes.`;
     screen.focus();
     await qmp.command('cont');
     refresh(module);
   } catch (error) { fail(error); }
+});
+
+cameraButton.addEventListener('click', async () => {
+  if (stopCamera) {
+    cameraOff();
+    screen.focus();
+    return;
+  }
+  cameraButton.disabled = true;
+  cameraStatus.textContent = 'Requesting camera permission…';
+  try {
+    const stop = await startCamera(emulator.FS, cameraVideo, cameraError);
+    if (!running) { stop(); return; }
+    stopCamera = stop;
+    cameraVideo.hidden = false;
+    cameraButton.textContent = 'Stop camera';
+    cameraStatus.textContent = 'Camera on. Frames stay in this browser; choose Scan a QR code in Thunderden.';
+    screen.focus();
+  } catch (error) { cameraError(error); }
+  finally { cameraButton.disabled = !running; }
 });
 
 function key(code, down) {

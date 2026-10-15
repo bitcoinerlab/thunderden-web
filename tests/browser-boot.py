@@ -30,6 +30,7 @@ with sync_playwright() as playwright:
     started = time.monotonic()
     try:
         page.goto(args.url)
+        assert page.locator("#camera").is_disabled()
         page.locator("#boot").click()
 
         def wait_for(text, name, timeout=600):
@@ -65,6 +66,7 @@ with sync_playwright() as playwright:
         wait_for("Choose a public key", "keyboard-navigation", timeout=60)
         page.keyboard.press("Escape")
         wait_for("What would you like to do", "returned-to-menu", timeout=60)
+        assert page.evaluate("document.querySelector('#camera-video').srcObject === null")
         print("PASS: original release image boots in Chromium and accepts real browser keyboard input")
     except Exception:
         print(json.dumps({
