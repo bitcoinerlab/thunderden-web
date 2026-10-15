@@ -22,8 +22,9 @@ the original implementations. This does **not** make a browser an airgapped devi
 
 Current work is a development prototype, not a deployed or verified browser signer.
 The native emulator has scanned a virtual USB webcam and verified a public fixture
-address using the unchanged preview.8 release image. A Wasm binary builds, but full
-guest boot, display/input and live browser camera capture remain to be integrated.
+address using the unchanged preview.8 release image. The Wasm binary builds and
+starts with the USB camera and RNG device in Chromium. Full browser guest boot,
+display/input, live camera capture and recovery-word generation remain unverified.
 See the emulator repository's `THUNDERDEN.md` for test commands and image hash.
 
 ## Development
