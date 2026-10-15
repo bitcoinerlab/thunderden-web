@@ -7,6 +7,7 @@ Run npm run setup and npm start before this test.
 import argparse
 import json
 from pathlib import Path
+import statistics
 import subprocess
 import time
 
@@ -16,6 +17,8 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("output", type=Path)
 parser.add_argument("--url", default="http://127.0.0.1:4173")
 parser.add_argument("--chromium")
+parser.add_argument("--max-frame-interval-ms", type=float,
+                    help="Optional median display-refresh budget; omit for functional checks on slow systems")
 args = parser.parse_args()
 out = args.output.resolve()
 out.mkdir(parents=True, exist_ok=True)
@@ -52,6 +55,25 @@ with sync_playwright() as playwright:
             raise TimeoutError(f"Did not see {text!r}; inspect {out}")
 
         wait_for("Choose a Bitcoin network", "network")
+        page.evaluate("""() => {
+            window.displayIntervals = [];
+            let previous = performance.now();
+            window.displayObserver = new MutationObserver(() => {
+                const now = performance.now();
+                window.displayIntervals.push(now - previous);
+                previous = now;
+            });
+            window.displayObserver.observe(document.querySelector('#screen'), {
+                attributes: true, attributeFilter: ['data-frames'],
+            });
+        }""")
+        page.wait_for_function("window.displayIntervals.length >= 13", timeout=30000)
+        intervals = page.evaluate("() => { window.displayObserver.disconnect(); return window.displayIntervals.slice(1); }")
+        median = statistics.median(intervals)
+        (out / "display-timing.json").write_text(json.dumps({"intervals_ms": intervals, "median_ms": median}, indent=2))
+        print(f"Median display refresh: {median:.1f} ms ({1000 / median:.1f} updates/s)", flush=True)
+        if args.max_frame_interval_ms is not None:
+            assert median <= args.max_frame_interval_ms, f"Display refresh exceeded {args.max_frame_interval_ms} ms: {median:.1f} ms"
         page.locator("#screen").focus()
         for _ in range(3):
             page.keyboard.press("ArrowDown")

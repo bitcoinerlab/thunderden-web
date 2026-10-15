@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { FRAME_BYTES, FRAME_PATH, clearCameraFrame, publishFrame, rgbaToYuyv } from '../web/camera.js';
+import { WIDTH, HEIGHT, FRAME_BYTES, FRAME_PATH, clearCameraFrame, publishFrame, rgbaToYuyv } from '../web/camera.js';
+
+test('browser camera buffers match the smaller virtual camera mode', () => {
+  assert.equal(WIDTH, 320);
+  assert.equal(HEIGHT, 240);
+  assert.equal(FRAME_BYTES, 153600);
+});
 
 test('black and white have neutral chroma and video-range luminance', () => {
   assert.deepEqual(rgbaToYuyv(Uint8Array.of(0, 0, 0, 255, 255, 255, 255, 255)),

@@ -54,7 +54,7 @@ in the browser and is not uploaded.
 
 The custom emulator reuses 9elements' USB Video Class device and exposes a
 host-side `frame-file` camera backend. The camera interface accepts complete
-640×480 YUYV frames to the emulator's host filesystem. The emulated USB device
+320×240 YUYV frames to the emulator's host filesystem. The emulated USB device
 then delivers them to the existing Linux UVC driver inside Thunderden.
 
 No helper, driver, scanner replacement, extra initramfs or application change is
@@ -96,6 +96,27 @@ Regtest, navigation into the public-key menu and Escape back to the main menu.
 No recovery words are entered by this boot test. Browser hosting requires HTTPS
 (or localhost), and live camera capture requires explicit camera permission.
 
+The display requests one screenshot at a time, waiting 33 ms after completion
+before requesting another. This replaces the initial 500 ms wait without queuing
+old screenshots when the emulator is slow. The guest display is 640×480, enlarged
+by the browser. The virtual camera's `browser` mode supplies 320×240 frames at
+2 fps, while local browser capture continues at up to 10 fps. This trades camera
+resolution and frame rate for fresh frames rather than a growing guest backlog.
+Rebuild the emulator before using this mode; the original native `standard` mode
+remains 640×480 at 10 fps.
+
+In a Linux/Chromium comparison, display updates increased from about 1.9 to 21
+per second and sampled menu key-to-screen latency fell from about 520 ms to
+40 ms. A numbered synthetic camera showed about 0.5 seconds of frame age with
+the browser profile, versus 7–8 seconds with the original profile. These are
+measured prototype results, not cross-platform guarantees. Screen refresh rate
+is not the same as fresh guest camera frames; the virtual camera is capped at
+2 fps. Small or distant QR codes may need to fill more of the camera preview.
+
+The boot check records display refresh intervals. To enforce a performance budget
+on a suitable test machine, add `--max-frame-interval-ms 250`; omit that option for
+functional testing on slower systems.
+
 A separate camera test uses Chromium's fake webcam to show a known QR through
 the real `getUserMedia()` and canvas APIs. It tests denied permission/retry, the
 original image's UVC scanner and public fixture address verification, and camera
@@ -108,3 +129,14 @@ python3 tests/browser-camera.py /path/to/camera-test-output --chromium /path/to/
 
 This camera test enters only the public `abandon`/`about` BIP39 fixture; it does
 not access a physical webcam or use real wallet material.
+
+To measure actual camera-frame age, rather than just screen refresh rate, use
+the numbered-video check (Playwright, Chromium and `tesseract`; no physical camera):
+
+```sh
+python3 tests/browser-camera-latency.py /path/to/latency-output --chromium /path/to/chromium --seconds 120 --max-frame-age-ms 1000
+```
+
+It records frame age and complete frame changes, then cancels the original
+scanner. The latency budget is optional and hardware-dependent. The synthetic
+counter repeats after 25.6 seconds, so longer delays are ambiguous.

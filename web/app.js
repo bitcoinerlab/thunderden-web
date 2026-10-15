@@ -70,7 +70,8 @@ async function refresh(module) {
     }
     context.putImageData(pixels, 0, 0);
     screen.dataset.frames = String(Number(screen.dataset.frames ?? 0) + 1);
-    setTimeout(() => refresh(module), 500);
+    // Wait after completion so slow dumps cannot build a queue of stale screens.
+    setTimeout(() => refresh(module), 33);
   } catch (error) { fail(error); }
 }
 
@@ -98,10 +99,10 @@ boot.addEventListener('click', async () => {
         '-m', '1024', '-smp', '1', '-cpu', 'qemu64', '-accel', 'tcg,tb-size=128',
         '-L', '/bios', '-display', 'none', '-S', '-nic', 'none', '-no-reboot',
         '-drive', 'file=/thunderden.img,format=raw,if=virtio,readonly=on',
-        '-vga', 'none', '-device', 'VGA,xres=1280,yres=800',
+        '-vga', 'none', '-device', 'VGA,xres=640,yres=480',
         // EHCI passed guest camera scanning in Wasm; xHCI timed out.
         '-device', 'virtio-rng-pci', '-device', 'usb-ehci,id=ehci',
-        '-videodev', 'frame-file,id=cam0,path=/camera.yuyv',
+        '-videodev', 'frame-file,id=cam0,path=/camera.yuyv,mode=browser',
         '-device', 'usb-video,bus=ehci.0,videodev=cam0', '-qmp', 'stdio',
       ],
       preRun: [instance => {
@@ -143,7 +144,7 @@ cameraButton.addEventListener('click', async () => {
     stopCamera = stop;
     cameraVideo.hidden = false;
     cameraButton.textContent = 'Stop camera';
-    cameraStatus.textContent = 'Camera on. Frames stay in this browser; choose Scan a QR code in Thunderden.';
+    cameraStatus.textContent = 'Camera on. Virtual camera: 320×240 at 2 fps. Frames stay in this browser; choose Scan a QR code in Thunderden.';
     screen.focus();
   } catch (error) { cameraError(error); }
   finally { cameraButton.disabled = !running; }

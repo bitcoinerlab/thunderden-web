@@ -1,6 +1,6 @@
 // Emulator-host frames only: no files are created in the Thunderden guest.
-export const WIDTH = 640;
-export const HEIGHT = 480;
+export const WIDTH = 320;
+export const HEIGHT = 240;
 export const FRAME_BYTES = WIDTH * HEIGHT * 2;
 export const FRAME_PATH = '/camera.yuyv';
 
@@ -23,7 +23,7 @@ export function rgbaToYuyv(rgba, output = new Uint8Array(rgba.length / 2)) {
 
 export function publishFrame(fs, frame) {
   if (frame.length !== FRAME_BYTES) {
-    throw new Error(`Camera frames must contain ${FRAME_BYTES} bytes of 640x480 YUYV`);
+    throw new Error(`Camera frames must contain ${FRAME_BYTES} bytes of ${WIDTH}x${HEIGHT} YUYV`);
   }
   // Replacement, rather than overwriting an open file, prevents torn frames.
   fs.writeFile(`${FRAME_PATH}.next`, frame);
