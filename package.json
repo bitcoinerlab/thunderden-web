@@ -1,0 +1,11 @@
+{
+  "name": "@bitcoinerlab/thunderden-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
