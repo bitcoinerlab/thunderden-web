@@ -12,20 +12,22 @@ import subprocess
 import time
 
 from playwright.sync_api import sync_playwright
+from browser_screen import capture_guest
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("output", type=Path)
 parser.add_argument("--url", default="http://127.0.0.1:4173")
 parser.add_argument("--chromium")
 parser.add_argument("--max-frame-interval-ms", type=float,
-                    help="Optional median display-refresh budget; omit for functional checks on slow systems")
+                     help="Optional median display-refresh budget; omit for functional checks on slow systems")
+parser.add_argument("--max-boot-seconds", type=float, help="Optional page-load-to-network-menu budget for a suitable test system")
 args = parser.parse_args()
 out = args.output.resolve()
 out.mkdir(parents=True, exist_ok=True)
 
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch(executable_path=args.chromium, headless=True)
-    page = browser.new_page(viewport={"width": 1360, "height": 1200})
+    page = browser.new_page(viewport={"width": 1366, "height": 768})
     errors = []
     console = []
     page.on("pageerror", lambda error: errors.append(str(error)))
@@ -34,7 +36,7 @@ with sync_playwright() as playwright:
     try:
         page.goto(args.url)
         assert page.locator("#camera").is_disabled()
-        page.locator("#boot").click()
+        assert page.locator("#boot-cover").is_visible()
 
         def wait_for(text, name, timeout=600):
             deadline = time.monotonic() + timeout
@@ -43,7 +45,7 @@ with sync_playwright() as playwright:
                 assert not status.startswith("Stopped:"), status
                 assert not errors, errors
                 capture = out / "screen.png"
-                page.locator("#screen").screenshot(path=str(capture))
+                capture_guest(page, capture)
                 ocr = subprocess.run(["tesseract", str(capture), "stdout", "--psm", "11"],
                                      capture_output=True, text=True, check=True).stdout
                 (out / "screen.txt").write_text(ocr)
@@ -55,6 +57,24 @@ with sync_playwright() as playwright:
             raise TimeoutError(f"Did not see {text!r}; inspect {out}")
 
         wait_for("Choose a Bitcoin network", "network")
+        elapsed = time.monotonic() - started
+        assert page.locator("#screen").get_attribute("data-ready") == "true"
+        assert page.locator("#boot-cover").is_hidden()
+        assert page.locator("#boot-controls").is_hidden()
+        assert page.locator("#screen").evaluate("screen => !screen.inert")
+        assert page.locator("#screen").get_attribute("data-keyboard") == "released"
+        assert page.locator("#screen").evaluate("screen => document.activeElement !== screen")
+        assert page.locator("#keyboard-prompt").is_visible()
+        assert page.evaluate("""() => {
+            const screen = document.querySelector('#screen').getBoundingClientRect();
+            const prompt = document.querySelector('#keyboard-prompt').getBoundingClientRect();
+            return prompt.left >= screen.left && prompt.top >= screen.top
+                && prompt.right <= screen.right && prompt.bottom <= screen.bottom;
+        }""")
+        page.screenshot(path=str(out / "laptop-ready.png"))
+        (out / "boot-timing.json").write_text(json.dumps({"seconds_to_network_menu": elapsed}, indent=2))
+        if args.max_boot_seconds is not None:
+            assert elapsed <= args.max_boot_seconds, "Guest boot exceeded the test budget"
         page.evaluate("""() => {
             window.displayIntervals = [];
             let previous = performance.now();
@@ -74,7 +94,40 @@ with sync_playwright() as playwright:
         print(f"Median display refresh: {median:.1f} ms ({1000 / median:.1f} updates/s)", flush=True)
         if args.max_frame_interval_ms is not None:
             assert median <= args.max_frame_interval_ms, f"Display refresh exceeded {args.max_frame_interval_ms} ms: {median:.1f} ms"
-        page.locator("#screen").focus()
+        # Mouse focus must show the orange border before any key is pressed.
+        page.evaluate("""async () => {
+            const { Qmp } = await import('./qmp.js');
+            const command = Qmp.prototype.command;
+            window.testInputEvents = [];
+            Qmp.prototype.command = function(name, args, ...rest) {
+                if (name === 'input-send-event') window.testInputEvents.push(...args.events);
+                return command.call(this, name, args, ...rest);
+            };
+        }""")
+        page.locator("#keyboard-prompt").click()
+        assert page.locator("#screen").get_attribute("data-keyboard") == "active"
+        assert page.locator("#keyboard-prompt").is_hidden()
+        assert page.locator("#screen").evaluate("screen => getComputedStyle(screen).outlineColor") == "rgb(223, 156, 67)"
+        assert page.evaluate("window.testInputEvents.length") == 0
+        assert "Click outside" in page.locator("#keyboard-status").inner_text()
+        page.screenshot(path=str(out / "keyboard-active.png"))
+        page.keyboard.down("Shift")
+        # A blank, non-focusable part of the scene must release a held modifier too.
+        page.locator(".scene").click(position={"x": 5, "y": 5})
+        assert page.locator("#screen").get_attribute("data-keyboard") == "released"
+        assert page.locator("#keyboard-prompt").is_hidden()
+        assert page.locator("#screen").evaluate("screen => getComputedStyle(screen).outlineStyle") == "none"
+        assert page.evaluate("window.testInputEvents") == [
+            {"type": "key", "data": {"down": True, "key": {"type": "qcode", "data": "shift"}}},
+            {"type": "key", "data": {"down": False, "key": {"type": "qcode", "data": "shift"}}},
+        ]
+        page.keyboard.up("Shift")
+        page.keyboard.press("ArrowDown")
+        assert page.evaluate("window.testInputEvents.length") == 2
+        page.screenshot(path=str(out / "keyboard-released.png"))
+        page.locator("#screen").click()
+        assert page.locator("#screen").get_attribute("data-keyboard") == "active"
+        assert page.locator("#screen").evaluate("screen => getComputedStyle(screen).outlineColor") == "rgb(223, 156, 67)"
         for _ in range(3):
             page.keyboard.press("ArrowDown")
             time.sleep(0.2)
@@ -89,7 +142,7 @@ with sync_playwright() as playwright:
         page.keyboard.press("Escape")
         wait_for("What would you like to do", "returned-to-menu", timeout=60)
         assert page.evaluate("document.querySelector('#camera-video').srcObject === null")
-        print("PASS: original release image boots in Chromium and accepts real browser keyboard input")
+        print("PASS: real guest navigation; click-to-focus border, outside-click release and held-key cleanup")
     except Exception:
         print(json.dumps({
             "status": page.locator("#status").inner_text(),

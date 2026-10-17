@@ -14,6 +14,7 @@ import subprocess
 import time
 
 from playwright.sync_api import sync_playwright
+from browser_screen import capture_guest
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("output", type=Path)
@@ -35,7 +36,7 @@ with sync_playwright() as playwright:
         "--use-fake-device-for-media-stream",
         f"--use-file-for-fake-video-capture={out / 'camera.y4m'}",
     ])
-    context = browser.new_context(viewport={"width": 1360, "height": 1440})
+    context = browser.new_context(viewport={"width": 1366, "height": 768})
     page = context.new_page()
     errors = []
     console = []
@@ -44,7 +45,7 @@ with sync_playwright() as playwright:
     started = time.monotonic()
     try:
         page.goto(args.url)
-        page.locator("#boot").click()
+        assert page.locator("#camera-led").get_attribute("data-active") == "false"
         page.wait_for_function("!document.querySelector('#camera').disabled", timeout=60000)
 
         # Rejection is recoverable: it must neither stop the VM nor leave capture on.
@@ -54,6 +55,8 @@ with sync_playwright() as playwright:
         page.wait_for_function("document.querySelector('#camera-status').textContent.includes('permission denied')")
         assert not page.locator("#status").inner_text().startswith("Stopped:")
         assert page.evaluate("document.querySelector('#camera-video').srcObject === null")
+        assert page.locator("#camera-panel").is_visible()
+        assert page.locator("#camera-led").get_attribute("data-active") == "false"
         print("PASS: permission denial leaves the VM running and can be retried", flush=True)
 
         context.grant_permissions(["camera"], origin=args.url)
@@ -61,6 +64,15 @@ with sync_playwright() as playwright:
         page.wait_for_function("document.querySelector('#camera').textContent === 'Stop camera'", timeout=30000)
         assert page.evaluate("document.querySelector('#camera-video').videoWidth > 0")
         assert page.evaluate("document.querySelector('#camera-video').srcObject.getAudioTracks().length") == 0
+        assert page.locator("#camera-led").get_attribute("data-active") == "true"
+        assert "320×240 at 10 fps" in page.locator("#camera-status").inner_text()
+        assert page.locator("#camera-led").evaluate("led => getComputedStyle(led).backgroundColor") == "rgb(80, 190, 115)"
+        assert page.locator("#camera-panel").is_visible()
+        page.locator("#camera-close").click()
+        assert page.locator("#camera-panel").is_hidden()
+        assert page.locator("#screen").get_attribute("data-keyboard") == "released"
+        assert page.locator("#camera-led").get_attribute("data-active") == "true"
+        assert page.evaluate("document.querySelector('#camera-video').srcObject.getVideoTracks().every(track => track.readyState === 'live')")
 
         def wait_for(text, name, timeout=180):
             deadline = time.monotonic() + timeout
@@ -70,7 +82,7 @@ with sync_playwright() as playwright:
                 assert not errors, errors
                 assert page.locator("#camera").inner_text() == "Stop camera", page.locator("#camera-status").inner_text()
                 capture = out / "screen.png"
-                page.locator("#screen").screenshot(path=str(capture))
+                capture_guest(page, capture)
                 ocr = subprocess.run(["tesseract", str(capture), "stdout", "--psm", "11"],
                                      capture_output=True, text=True, check=True).stdout
                 (out / "screen.txt").write_text(ocr)
@@ -86,6 +98,7 @@ with sync_playwright() as playwright:
             raise TimeoutError(f"Did not see {text!r}; inspect {out}")
 
         wait_for("Choose a Bitcoin network", "network")
+        page.screenshot(path=str(out / "laptop-camera-ready.png"))
         page.locator("#screen").focus()
         page.keyboard.press("Enter")  # Mainnet, public test wallet only.
         wait_for("What would you like to do", "menu")
@@ -107,12 +120,17 @@ with sync_playwright() as playwright:
         page.evaluate("window.cameraTestTracks = document.querySelector('#camera-video').srcObject.getTracks()")
         page.locator("#camera").click()
         assert page.locator("#camera").inner_text() == "Enable camera"
+        assert page.locator("#screen").get_attribute("data-keyboard") == "released"
+        assert page.locator("#camera-led").get_attribute("data-active") == "false"
+        assert page.locator("#camera-panel").is_hidden()
         assert page.evaluate("window.cameraTestTracks.every(track => track.readyState === 'ended')")
         assert page.evaluate("document.querySelector('#camera-video').srcObject === null")
         page.locator("#camera").click()
         page.wait_for_function("document.querySelector('#camera').textContent === 'Stop camera'")
         page.evaluate("document.querySelector('#camera-video').srcObject.getVideoTracks()[0].dispatchEvent(new Event('ended'))")
         assert "disconnected" in page.locator("#camera-status").inner_text()
+        assert page.locator("#camera-led").get_attribute("data-active") == "false"
+        assert page.locator("#camera-panel").is_visible()
         assert page.evaluate("document.querySelector('#camera-video').srcObject === null")
         assert page.locator("#camera").inner_text() == "Enable camera"
         assert not errors, errors

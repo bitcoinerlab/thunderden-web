@@ -1,0 +1,170 @@
+:root {
+  color-scheme: light;
+  font: 14px/1.45 system-ui, sans-serif;
+  color: #302f2b;
+  background: #e8e5df;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  padding: 18px 28px 12px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  background: radial-gradient(ellipse at 50% 35%, #f7f4ee 0, #e8e5df 68%, #d9d6d0 100%);
+}
+button, summary { cursor: pointer; }
+button { font: inherit; }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid #b77422; outline-offset: 4px; }
+.topbar, .page-footer { width: min(1280px, 100%); margin-inline: auto; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.brand h1 { margin: 0; font-size: 18px; letter-spacing: .12em; font-weight: 750; }
+.brand p { margin: 3px 0 0; color: #716e67; font-size: 12px; }
+.actions { display: flex; align-items: center; gap: 8px; }
+.actions button, .close-panel {
+  border: 1px solid #c9c5bd;
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: #f7f4eee6;
+  color: #3b3934;
+}
+.actions button:hover:not(:disabled) { background: #fffdf8; border-color: #99958c; }
+.scene { min-width: 0; min-height: 0; display: grid; place-items: center; container-type: size; }
+#device {
+  position: relative;
+  width: min(1180px, 100%, calc((100dvh - 145px) * 1120 / 830));
+  aspect-ratio: 1120 / 830;
+}
+@supports (width: 1cqw) {
+  #device { width: min(1180px, 100cqw, calc(100cqh * 1120 / 830)); }
+}
+.laptop-art { display: block; width: 100%; height: 100%; pointer-events: none; user-select: none; }
+.device-brand { position: absolute; width: 17%; height: auto; pointer-events: none; }
+.lid-brand { left: 12.5%; top: 68.2%; }
+.deck-brand { left: 75.5%; top: 90.7%; transform-origin: top left; transform: matrix(1, 0, .18, .42, 0, 0); }
+#camera-led { position: absolute; left: 50.9%; top: 3.8%; width: .6%; height: .5%; border-radius: 2px; background: #b83142; box-shadow: 0 0 2px #b8314260; }
+#camera-led[data-active="true"] { background: #50be73; box-shadow: 0 0 4px #50be7380; }
+#screen-wrapper {
+  position: absolute;
+  left: 13.214286%; top: 5.903614%; width: 73.571429%; height: 62.048193%;
+  background: #050608;
+  color: #efefe9;
+  color-scheme: dark;
+  border-radius: 2px;
+  container-type: size;
+}
+#screen { display: block; width: 100%; height: 100%; object-fit: contain; background: #050608; image-rendering: pixelated; }
+#screen[data-keyboard="active"] { outline: 2px solid #df9c43; outline-offset: 3px; }
+#boot-cover { position: absolute; inset: 0; padding: clamp(12px, 3cqh, 24px); display: grid; place-items: center; background: #191a18; }
+.boot-card { width: min(560px, 100%); max-height: 100%; overflow: auto; scrollbar-width: thin; text-align: center; }
+.boot-mark { margin: 0 0 12px; color: #f0a441; letter-spacing: .16em; font-size: 13px; font-weight: 650; }
+.boot-heading { display: flex; justify-content: center; align-items: center; gap: 14px; }
+#boot-title { margin: 0; font-size: clamp(22px, 4.5cqw, 30px); line-height: 1.2; font-weight: 500; }
+.boot-spinner { flex: 0 0 auto; width: 34px; height: 34px; border: 3px solid #444640; border-top-color: #eea54c; border-radius: 50%; animation: boot-spin 1s linear infinite; }
+#boot-message { margin: 14px 0; color: #b5b5ad; font-size: 16px; }
+.boot-card:has(#startup:not([hidden])) #boot-message { display: none; }
+#boot-estimate { margin: 18px 0 10px; color: #b5b5ad; font-size: 16px; }
+#boot-elapsed { margin: 0; color: #b5b5ad; font-size: 16px; font-variant-numeric: tabular-nums; }
+#startup { margin-top: 16px; text-align: left; font-size: 15px; color: #babdb3; }
+#startup ol { padding: 0; margin: 0; list-style: none; }
+#startup li { margin: 0 0 12px; }
+#startup label { display: block; font-size: 15px; }
+#startup progress { display: block; width: 100%; height: 9px; margin: 5px 0; accent-color: #e6a14a; }
+#startup small { display: block; color: #b5b5ad; font-size: 14px; }
+#startup [data-state="done"] label { color: #b1bdaa; }
+#startup [data-state="error"] small { color: #f4ad70; }
+#keyboard-guide { margin-top: 18px; padding: 12px; border: 1px solid #45483f; border-radius: 6px; background: #20221d; }
+#keyboard-instructions { margin: 0; color: #efefe9; font-size: 18px; line-height: 1.4; }
+#keyboard-instructions strong { font-weight: 600; }
+.guide-keys { margin: 8px 0 0; color: #b5b5ad; font-size: 14px; }
+#keyboard-guide kbd { color: #efefe9; }
+#keyboard-prompt { position: absolute; left: 50%; bottom: 20%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); padding: 12px 18px; border: 1px solid #df9c43; border-radius: 6px; background: #20221df2; color: #efefe9; font-size: 18px; line-height: 1.4; box-shadow: 0 4px 18px #0006; }
+#boot-controls { position: absolute; right: 10px; bottom: 8px; z-index: 2; }
+#boot-details { border: 0; border-radius: 4px; padding: 6px 8px; background: #191a18dd; color: #b5b5ad; text-decoration: underline; font-size: 14px; }
+#boot-error { color: #ffbd83; font-size: 16px; overflow-wrap: anywhere; }
+#retry { margin: 10px 0 0; border: 1px solid #bc8544; border-radius: 4px; background: #cf903e; color: #181a16; padding: 7px 14px; }
+#boot-diagnostics { border: 0; background: transparent; color: #b5b5ad; font-size: 14px; text-decoration: underline; padding: 7px 10px; }
+.page-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 11px; color: #79746b; }
+.warning { margin: 0; color: #83512d; }
+.hint { margin: 0; text-align: right; }
+.keyboard-help { text-align: right; }
+#keyboard-status { margin: 0 0 3px; font-size: 14px; color: #57534b; }
+body:has(#screen[data-keyboard="active"]) #keyboard-status { color: #8a571a; }
+kbd { font: inherit; color: #4d4a44; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+#camera-panel { position: fixed; z-index: 4; top: 76px; right: 24px; width: 246px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 100px); overflow: auto; padding: 12px; border: 1px solid #c7c2b8; border-radius: 9px; background: #f5f2eb; box-shadow: 0 12px 40px #26231e25; }
+.panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.panel-heading h2 { margin: 0; font-size: 12px; font-weight: 600; }
+.close-panel { padding: 3px 7px; font-size: 11px; }
+#camera-video { display: block; width: 100%; max-height: 165px; border-radius: 4px; background: #171915; }
+#camera-status { margin: 9px 0 0; color: #6f6b62; font-size: 12px; }
+dialog { width: min(540px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); padding: 24px; border: 1px solid #c7c2b9; border-radius: 12px; background: #f4f1ea; color: #39362f; box-shadow: 0 20px 80px #17141040; }
+dialog::backdrop { background: #1c1b1877; }
+dialog h2 { font-size: 19px; margin: 0 0 18px; }
+dialog p { font-size: 13px; }
+dialog form { float: right; }
+dialog a { color: #80521e; }
+#diagnostics { font-size: 12px; margin-top: 18px; }
+#log { max-height: 230px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.5 monospace; color: #625e54; }
+@keyframes boot-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .boot-spinner { animation: none; } }
+@container (max-height: 479px) {
+  #screen { image-rendering: auto; }
+}
+@container (max-height: 430px) {
+  .boot-mark { display: none; }
+}
+@container (max-height: 340px) {
+  #boot-cover { padding: 10px; }
+  .boot-mark { display: none; }
+  #boot-title { font-size: 22px; }
+  .boot-spinner { width: 30px; height: 30px; }
+  #boot-message { display: none; }
+  #startup { margin-top: 10px; }
+  #startup li { margin-bottom: 6px; }
+  #startup label { font-size: 14px; }
+  #startup small { font-size: 13px; }
+  #boot-estimate, #boot-elapsed { font-size: 14px; }
+  #keyboard-guide { margin-top: 12px; padding: 8px; }
+  #keyboard-instructions { font-size: 15px; }
+  .guide-keys { font-size: 13px; }
+}
+@container (max-height: 270px) {
+  #boot-title { font-size: 20px; }
+  #startup { margin-top: 8px; }
+  #startup li { margin-bottom: 5px; }
+  #startup label, #startup small { font-size: 12px; }
+  #startup progress { height: 8px; margin-block: 3px; }
+  #boot-estimate { margin-top: 10px; }
+  #keyboard-guide { margin-top: 8px; }
+  #keyboard-instructions { font-size: 13px; }
+  #keyboard-prompt { font-size: 15px; padding: 10px 12px; }
+  .guide-keys { display: none; }
+}
+@media (max-width: 700px), (max-height: 560px) {
+  body { padding: 12px; gap: 10px; }
+  .brand h1 { font-size: 15px; }
+  .brand p { font-size: 10px; }
+  .actions { gap: 5px; }
+  .actions button { padding: 7px 9px; font-size: 11px; }
+  .laptop-art, .device-brand, #camera-led { display: none; }
+  #device { width: min(100%, calc((100dvh - 145px) * 4 / 3)); aspect-ratio: 4 / 3; border: 9px solid #23262b; border-radius: 7px; box-shadow: 0 12px 25px #24211c25; }
+  @supports (width: 1cqw) { #device { width: min(100cqw, calc(100cqh * 4 / 3)); } }
+  #screen-wrapper { inset: 0; width: 100%; height: 100%; }
+  #boot-cover { padding: 12px; }
+  .page-footer { flex-direction: column; justify-content: center; gap: 4px; font-size: 10px; }
+  .hint { text-align: center; }
+  .keyboard-help { text-align: center; }
+  #keyboard-status { font-size: 12px; }
+  #camera-panel { top: 65px; right: 12px; }
+}
+@media (max-width: 420px) {
+  .topbar { flex-wrap: wrap; gap: 9px; }
+  .brand { width: 100%; }
+  .actions { width: 100%; justify-content: flex-end; }
+  #camera-panel { top: 100px; }
+}

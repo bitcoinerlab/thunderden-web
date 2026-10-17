@@ -2,32 +2,74 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Thunderden browser prototype</title>
-<style>
-  :root { color-scheme: dark; font: 16px system-ui, sans-serif; background: #191a18; color: #efefe9; }
-  body { max-width: 1280px; margin: 24px auto; padding: 0 16px; }
-  h1 { font-size: 1.5rem; margin-bottom: 8px; }
-  .warning { color: #ffb950; }
-  button { padding: 10px 18px; margin: 0 8px 8px 0; font: inherit; cursor: pointer; }
-  #boot { background: #f7931a; color: #191a18; border: 0; border-radius: 4px; }
-  button:disabled { opacity: .5; cursor: default; }
-  #screen { display: block; width: 100%; height: auto; background: #000; border: 2px solid #555; image-rendering: pixelated; }
-  #screen:focus { outline: 2px solid #f7931a; outline-offset: 3px; }
-  #status, #camera-status, .hint { color: #b5b5ad; }
-  #camera-video { max-width: 240px; max-height: 180px; margin-bottom: 12px; }
-  #log { white-space: pre-wrap; overflow-wrap: anywhere; }
-</style>
-<h1>Thunderden browser prototype</h1>
-<p class="warning"><strong>Demo only.</strong> Never enter real recovery words or fund a wallet generated here.</p>
-<p>Boots the original preview.8 image locally in your browser. Nothing is added to the guest.</p>
-<button id="boot">Boot Thunderden</button>
-<button id="restart" disabled>Restart / clear demo</button>
-<button id="camera" disabled>Enable camera</button>
-<p id="camera-status" role="status">Camera off.</p>
-<video id="camera-video" autoplay muted playsinline hidden aria-label="Local camera preview"></video>
-<p id="status" role="status">Ready. The first boot may take several minutes.</p>
-<canvas id="screen" width="640" height="480" tabindex="0" aria-label="Thunderden virtual computer screen"></canvas>
-<p class="hint">Click the screen to focus it, then use your keyboard: arrows, Enter, Esc and typing. US keyboard layout. Enable and allow the camera before starting a scan in Thunderden.</p>
-<details><summary>Emulator diagnostics</summary><pre id="log"></pre></details>
+<title>Thunderden — virtual device demo</title>
+<link rel="stylesheet" href="./style.css">
+<header class="topbar">
+  <div class="brand"><h1>THUNDERDEN</h1><p>Original software. Virtual hardware.</p></div>
+  <nav class="actions" aria-label="Demo controls">
+    <button id="camera" type="button" disabled>Enable camera</button>
+    <button id="restart" type="button" disabled title="Restart and clear the virtual device">Restart</button>
+    <button id="about" type="button">About</button>
+  </nav>
+</header>
+<main class="scene" aria-label="Thunderden virtual laptop with an attached USB drive">
+  <div id="device">
+    <img class="laptop-art" src="./laptop.svg" alt="" aria-hidden="true">
+    <img class="device-brand lid-brand" src="./brand/thunderden-horizontal-paper.svg" alt="" aria-hidden="true">
+    <img class="device-brand deck-brand" src="./brand/thunderden-horizontal-paper.svg" alt="" aria-hidden="true">
+    <span id="camera-led" data-active="false" aria-hidden="true"></span>
+    <section id="screen-wrapper" aria-label="Virtual device display">
+      <canvas id="screen" width="640" height="480" tabindex="0" inert data-ready="false" data-keyboard="released" aria-label="Thunderden virtual computer screen" aria-describedby="keyboard-instructions"></canvas>
+      <section id="boot-cover" aria-labelledby="boot-title">
+        <div class="boot-card">
+          <p class="boot-mark">THUNDERDEN · VIRTUAL DEVICE</p>
+          <div class="boot-heading"><div class="boot-spinner" aria-hidden="true"></div><h2 id="boot-title" role="status">Preparing Thunderden…</h2></div>
+          <p id="boot-message">Loading the original release and emulator.</p>
+          <div id="startup">
+            <ol>
+              <li id="startup-image"><label for="image-progress">Thunderden image</label><progress id="image-progress" max="1" value="0"></progress><small>Connecting…</small></li>
+              <li id="startup-wasm"><label for="wasm-progress">WebAssembly emulator</label><progress id="wasm-progress" max="1" value="0"></progress><small>Connecting…</small></li>
+            </ol>
+          </div>
+          <p id="boot-estimate" hidden>Usually around 10 seconds once files are loaded. Slower devices may take longer.</p>
+          <p id="boot-elapsed" role="timer" aria-live="off" hidden></p>
+          <aside id="keyboard-guide" aria-label="Keyboard controls">
+            <p id="keyboard-instructions"><strong>Click the screen</strong> to use your keyboard.<br><strong>Click outside</strong> to release it.</p>
+            <p class="guide-keys"><kbd>↑ ↓</kbd> navigate · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back</p>
+          </aside>
+          <p id="boot-error" hidden></p>
+          <button id="retry" type="button" hidden>Restart demo</button>
+          <button id="boot-diagnostics" type="button" hidden>View diagnostics</button>
+        </div>
+      </section>
+      <button id="keyboard-prompt" type="button" hidden aria-controls="screen">Click the screen to use your keyboard</button>
+      <div id="boot-controls" hidden><button id="boot-details" type="button" disabled aria-controls="screen" aria-expanded="false">Show boot details</button></div>
+    </section>
+  </div>
+</main>
+<footer class="page-footer">
+  <p class="warning"><strong>Demo only.</strong> Never use real recovery words or funds.</p>
+  <div class="keyboard-help">
+    <p id="keyboard-status" role="status">Keyboard available after startup</p>
+    <p class="hint"><kbd>↑ ↓</kbd> navigate · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back · US keyboard</p>
+  </div>
+</footer>
+<p id="status" class="sr-only" role="status">Preparing the virtual device.</p>
+<aside id="camera-panel" hidden aria-label="Local camera preview">
+  <div class="panel-heading"><h2>Local camera preview</h2><button id="camera-close" class="close-panel" type="button">Hide preview</button></div>
+  <video id="camera-video" autoplay muted playsinline hidden aria-label="Local camera preview"></video>
+  <p id="camera-status" role="status">Camera off.</p>
+</aside>
+<dialog id="about-dialog" aria-labelledby="about-title">
+  <form method="dialog"><button class="close-panel" aria-label="Close information">Close</button></form>
+  <h2 id="about-title">A real Thunderden, virtually.</h2>
+  <p>This demo runs the original preview.8 kernel and applications in your browser. The release image is verified unchanged. Direct kernel boot skips GRUB; no helper or replacement application is added to the guest.</p>
+  <p><strong>Never enter real recovery words or use demo wallets for funds.</strong> A browser is not an air-gapped device. Use only public test fixtures.</p>
+  <p>Camera access is optional and requires your permission. Frames stay in your browser. Enable the camera before selecting Scan a QR code inside Thunderden.</p>
+  <p>The emulator reserves about 2.3 GiB of memory. Use one demo tab at a time. Best experienced with a desktop keyboard. The laptop and USB drive are illustrations, not physical USB passthrough. The webcam indicator turns green while browser capture is active.</p>
+  <p><a href="https://github.com/bitcoinerlab/thunderden-web" target="_blank" rel="noreferrer">Source and setup instructions</a></p>
+  <details id="diagnostics"><summary>Emulator diagnostics</summary><pre id="log"></pre></details>
+</dialog>
 <script type="module" src="./app.js"></script>
+<noscript><p class="warning">JavaScript is required to run the virtual device.</p></noscript>
 </html>

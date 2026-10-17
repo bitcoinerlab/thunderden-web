@@ -3,3 +3,4 @@ dist/
 web/emulator/
 web/assets/
 test-results/
+__pycache__/

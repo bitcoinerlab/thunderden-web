@@ -17,6 +17,8 @@ export class Qmp {
       write: bytes => this.receive(Uint8Array.from(bytes)),
       onReadable: fn => {
         this.readers.add(fn);
+        // A command may arrive between the worker's readiness check and subscription.
+        if (this.input.length) fn();
         return { dispose: () => this.readers.delete(fn) };
       },
       onSignal: () => ({ dispose() {} }),
@@ -47,7 +49,24 @@ export class Qmp {
     }
   }
 
+  flush() {
+    if (this.buffer.trim()) this.onLog(this.buffer.trim());
+    this.buffer = '';
+  }
+
+  close(error) {
+    if (this.closed) return;
+    this.closed = error;
+    this.input.length = 0; // Never deliver queued keystrokes after a terminal failure.
+    for (const pending of this.pending.values()) {
+      clearTimeout(pending.timer);
+      pending.reject(error);
+    }
+    this.pending.clear();
+  }
+
   command(execute, args = {}, timeout = 30000) {
+    if (this.closed) return Promise.reject(this.closed);
     const id = ++this.sequence;
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {

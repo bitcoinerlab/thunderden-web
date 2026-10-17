@@ -41,3 +41,46 @@ test('surface QMP errors and timeouts rather than hanging the page', async () =>
   await assert.rejects(qmp.command('missing', {}, 5), /timed out/);
   assert.equal(qmp.pending.size, 0);
 });
+
+test('preserve a trailing emulator diagnostic without a newline', () => {
+  const log = [];
+  const qmp = new Qmp(line => log.push(line));
+  qmp.receive(bytes('Emulator stopped before completing a line'));
+  assert.deepEqual(log, []);
+  qmp.flush();
+  qmp.flush();
+  assert.deepEqual(log, ['Emulator stopped before completing a line']);
+});
+
+test('wake a reader that subscribes after a command is already queued', async () => {
+  const qmp = new Qmp();
+  // The worker can check readability before this command, then subscribe later.
+  const result = qmp.command('query-status');
+  let wakes = 0;
+  const subscription = qmp.pty.onReadable(() => { wakes++; });
+  const sent = JSON.parse(new TextDecoder().decode(qmp.pty.read(4096)));
+  qmp.receive(bytes(JSON.stringify({ return: {}, id: sent.id }) + '\n'));
+  await result;
+  subscription.dispose();
+  assert.equal(wakes, 1);
+});
+
+test('closing QMP rejects pending commands and discards queued input without replay', async () => {
+  const qmp = new Qmp();
+  const first = qmp.command('screendump');
+  const second = qmp.command('input-send-event');
+  const error = new Error('Emulator command timed out: screendump');
+  const firstRejected = assert.rejects(first, actual => actual === error);
+  const secondRejected = assert.rejects(second, actual => actual === error);
+  qmp.close(error);
+  await Promise.all([firstRejected, secondRejected]);
+  assert.equal(qmp.pending.size, 0);
+  assert.equal(qmp.pty.readable, false);
+  assert.deepEqual(qmp.pty.read(4096), new Uint8Array());
+  const sequence = qmp.sequence;
+  qmp.close(new Error('Later failure'));
+  await assert.rejects(qmp.command('input-send-event'), actual => actual === error);
+  assert.equal(qmp.sequence, sequence);
+  qmp.receive(bytes('{"return":{},"id":1}\n')); // A late reply must not reopen it.
+  assert.equal(qmp.pty.readable, false);
+});

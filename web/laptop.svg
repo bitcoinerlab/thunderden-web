@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 830" fill="none">
+  <defs>
+    <linearGradient id="lid" x1="120" y1="18" x2="1000" y2="613" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34373b"/><stop offset=".25" stop-color="#191b1f"/><stop offset="1" stop-color="#101114"/>
+    </linearGradient>
+    <linearGradient id="deck" x1="560" y1="615" x2="560" y2="805" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#32353a"/><stop offset=".45" stop-color="#25282d"/><stop offset="1" stop-color="#191b20"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="560" y1="791" x2="560" y2="808" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#454950"/><stop offset=".35" stop-color="#24272c"/><stop offset="1" stop-color="#0d0f12"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="1010" y1="645" x2="1010" y2="668" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a9a9a5"/><stop offset=".4" stop-color="#e1e0d8"/><stop offset="1" stop-color="#727575"/>
+    </linearGradient>
+    <linearGradient id="usb" x1="1034" y1="640" x2="1034" y2="674" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffb34e"/><stop offset=".5" stop-color="#e88a20"/><stop offset="1" stop-color="#ac5615"/>
+    </linearGradient>
+    <radialGradient id="point"><stop stop-color="#ed4c59"/><stop offset=".6" stop-color="#c21d36"/><stop offset="1" stop-color="#761125"/></radialGradient>
+    <g id="keycap">
+      <rect x="-26" y="-14" width="52" height="28" rx="3" fill="#191d22" stroke="#555b62" stroke-width="1"/>
+      <path d="M-22-11h44" stroke="#747b82" stroke-width=".7"/>
+    </g>
+    <pattern id="speaker" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".7" fill="#0a0b0d"/></pattern>
+    <filter id="shadow" x="0" y="0" width="1120" height="830" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="12"/></filter>
+  </defs>
+  <ellipse cx="560" cy="797" rx="480" ry="15" fill="#2b2926" opacity=".23" filter="url(#shadow)"/>
+  <rect x="120" y="18" width="880" height="595" rx="11" fill="url(#lid)" stroke="#55585c" stroke-width="1.5"/>
+  <rect x="125" y="23" width="870" height="585" rx="8" stroke="#080a0d" stroke-width="2"/>
+  <rect x="145" y="46" width="830" height="521" rx="3" fill="#050608" stroke="#3d4146"/>
+  <rect x="148" y="49" width="824" height="515" fill="#08090b"/>
+  <rect x="540" y="29" width="40" height="9" rx="4.5" fill="#0a0c0f"/>
+  <circle cx="560" cy="33.5" r="2.7" fill="#050509" stroke="#4e535b" stroke-width=".7"/>
+  <circle cx="560.6" cy="32.8" r=".8" fill="#586273"/>
+  <circle cx="534" cy="34" r="1" fill="#62666c"/><circle cx="586" cy="34" r="1" fill="#62666c"/>
+  <path d="M138 609h844" stroke="#45494f"/>
+  <rect x="208" y="607" width="704" height="14" rx="5" fill="#0e1014" stroke="#484c52"/>
+  <path d="M238 610v8m18-8v8m608-8v8m18-8v8" stroke="#2e3238" stroke-width="3"/>
+  <path d="M115 617h890l66 174c2 6-4 10-12 10H62c-8 0-12-4-9-10l62-174Z" fill="url(#deck)" stroke="#53565c" stroke-width="1.2"/>
+  <path d="M54 791c1 5 4 7 10 7h994c6 0 10-2 12-7l-5 12c-1 3-5 5-10 5H68c-5 0-9-2-10-5l-4-12Z" fill="url(#edge)"/>
+  <path d="M67 800h986" stroke="#606369" stroke-width=".8" opacity=".6"/>
+  <!-- Keycaps and legends share local coordinates projected onto the deck plane. -->
+  <path d="M168.48 631.59L951.52 631.59L980.81 729.39L139.19 729.39Z" fill="#090c0f" stroke="#555960"/>
+  <g id="keyboard" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" dominant-baseline="central">
+    <g class="key" transform="matrix(0.9062 0 -0.1026 0.3777 202.36 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">esc</text></g>
+    <g class="key" transform="matrix(0.9062 0 -0.0869 0.3777 257.38 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F1</text></g>
+    <g class="key" transform="matrix(0.9062 0 -0.0711 0.3777 312.40 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F2</text></g>
+    <g class="key" transform="matrix(0.9062 0 -0.0553 0.3777 367.42 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F3</text></g>
+    <g class="key" transform="matrix(0.9062 0 -0.0395 0.3777 422.45 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F4</text></g>
+    <g class="key" transform="matrix(0.9062 0 -0.0237 0.3777 477.47 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F5</text></g>
+    <g class="key" transform="matrix(0.9062 0 -0.0079 0.3777 532.49 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F6</text></g>
+    <g class="key" transform="matrix(0.9062 0 0.0079 0.3777 587.51 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F7</text></g>
+    <g class="key" transform="matrix(0.9062 0 0.0237 0.3777 642.53 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F8</text></g>
+    <g class="key" transform="matrix(0.9062 0 0.0395 0.3777 697.55 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F9</text></g>
+    <g class="key" transform="matrix(0.9062 0 0.0553 0.3777 752.58 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F10</text></g>
+    <g class="key" transform="matrix(0.9062 0 0.0711 0.3777 807.60 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F11</text></g>
+    <g class="key" transform="matrix(0.9062 0 0.0869 0.3777 862.62 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">F12</text></g>
+    <g class="key" transform="matrix(0.9062 0 0.1026 0.3777 917.64 640.59)"><use href="#keycap" transform="scale(1.0522 1)"/><text fill="#c7cbc9" font-size="14">delete</text></g>
+    <g class="key" transform="matrix(0.9164 0 -0.1055 0.3863 196.49 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">`</text></g>
+    <g class="key" transform="matrix(0.9164 0 -0.0904 0.3863 248.42 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">1</text></g>
+    <g class="key" transform="matrix(0.9164 0 -0.0754 0.3863 300.35 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">2</text></g>
+    <g class="key" transform="matrix(0.9164 0 -0.0603 0.3863 352.28 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">3</text></g>
+    <g class="key" transform="matrix(0.9164 0 -0.0452 0.3863 404.21 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">4</text></g>
+    <g class="key" transform="matrix(0.9164 0 -0.0301 0.3863 456.14 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">5</text></g>
+    <g class="key" transform="matrix(0.9164 0 -0.0151 0.3863 508.07 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">6</text></g>
+    <g class="key" transform="matrix(0.9164 0 0.0000 0.3863 560.00 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">7</text></g>
+    <g class="key" transform="matrix(0.9164 0 0.0151 0.3863 611.93 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">8</text></g>
+    <g class="key" transform="matrix(0.9164 0 0.0301 0.3863 663.86 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">9</text></g>
+    <g class="key" transform="matrix(0.9164 0 0.0452 0.3863 715.79 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">0</text></g>
+    <g class="key" transform="matrix(0.9164 0 0.0603 0.3863 767.72 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">-</text></g>
+    <g class="key" transform="matrix(0.9164 0 0.0754 0.3863 819.65 655.38)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">=</text></g>
+    <g class="key" transform="matrix(0.9164 0 0.0980 0.3863 897.55 655.38)"><use href="#keycap" transform="scale(2.0641 1)"/><text fill="#c7cbc9" font-size="14">backspace</text></g>
+    <g class="key" transform="matrix(0.9268 0 -0.1041 0.3951 205.48 670.50)"><use href="#keycap" transform="scale(1.5192 1)"/><text fill="#c7cbc9" font-size="14">tab</text></g>
+    <g class="key" transform="matrix(0.9268 0 -0.0848 0.3951 271.14 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">Q</text></g>
+    <g class="key" transform="matrix(0.9268 0 -0.0694 0.3951 323.66 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">W</text></g>
+    <g class="key" transform="matrix(0.9268 0 -0.0540 0.3951 376.18 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">E</text></g>
+    <g class="key" transform="matrix(0.9268 0 -0.0385 0.3951 428.70 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">R</text></g>
+    <g class="key" transform="matrix(0.9268 0 -0.0231 0.3951 481.22 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">T</text></g>
+    <g class="key" transform="matrix(0.9268 0 -0.0077 0.3951 533.74 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">Y</text></g>
+    <g class="key" transform="matrix(0.9268 0 0.0077 0.3951 586.26 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">U</text></g>
+    <g class="key" transform="matrix(0.9268 0 0.0231 0.3951 638.78 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">I</text></g>
+    <g class="key" transform="matrix(0.9268 0 0.0385 0.3951 691.30 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">O</text></g>
+    <g class="key" transform="matrix(0.9268 0 0.0540 0.3951 743.82 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">P</text></g>
+    <g class="key" transform="matrix(0.9268 0 0.0694 0.3951 796.34 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">[</text></g>
+    <g class="key" transform="matrix(0.9268 0 0.0848 0.3951 848.86 670.50)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">]</text></g>
+    <g class="key" transform="matrix(0.9268 0 0.1041 0.3951 914.52 670.50)"><use href="#keycap" transform="scale(1.5192 1)"/><text fill="#c7cbc9">\</text></g>
+    <g class="key" transform="matrix(0.9375 0 -0.1045 0.4043 208.05 685.98)"><use href="#keycap" transform="scale(1.7917 1)"/><text fill="#c7cbc9" font-size="14">caps</text></g>
+    <g class="key" transform="matrix(0.9375 0 -0.0828 0.4043 281.10 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">A</text></g>
+    <g class="key" transform="matrix(0.9375 0 -0.0670 0.4043 334.22 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">S</text></g>
+    <g class="key" transform="matrix(0.9375 0 -0.0513 0.4043 387.34 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">D</text></g>
+    <g class="key" transform="matrix(0.9375 0 -0.0355 0.4043 440.47 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">F</text></g>
+    <g class="key" transform="matrix(0.9375 0 -0.0197 0.4043 493.59 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">G</text></g>
+    <g class="key" transform="matrix(0.9375 0 -0.0039 0.4043 546.72 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">H</text></g>
+    <g class="key" transform="matrix(0.9375 0 0.0118 0.4043 599.84 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">J</text></g>
+    <g class="key" transform="matrix(0.9375 0 0.0276 0.4043 652.97 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">K</text></g>
+    <g class="key" transform="matrix(0.9375 0 0.0434 0.4043 706.09 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">L</text></g>
+    <g class="key" transform="matrix(0.9375 0 0.0591 0.4043 759.22 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">;</text></g>
+    <g class="key" transform="matrix(0.9375 0 0.0749 0.4043 812.34 685.98)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">'</text></g>
+    <g class="key" transform="matrix(0.9375 0 0.1005 0.4043 898.67 685.98)"><use href="#keycap" transform="scale(2.3365 1)"/><text fill="#c7cbc9" font-size="14">enter</text></g>
+    <g class="key" transform="matrix(0.9484 0 -0.1029 0.4137 217.39 701.81)"><use href="#keycap" transform="scale(2.3365 1)"/><text fill="#c7cbc9" font-size="14">shift</text></g>
+    <g class="key" transform="matrix(0.9484 0 -0.0767 0.4137 304.72 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">Z</text></g>
+    <g class="key" transform="matrix(0.9484 0 -0.0605 0.4137 358.47 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">X</text></g>
+    <g class="key" transform="matrix(0.9484 0 -0.0444 0.4137 412.21 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">C</text></g>
+    <g class="key" transform="matrix(0.9484 0 -0.0282 0.4137 465.95 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">V</text></g>
+    <g class="key" transform="matrix(0.9484 0 -0.0121 0.4137 519.69 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">B</text></g>
+    <g class="key" transform="matrix(0.9484 0 0.0040 0.4137 573.44 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">N</text></g>
+    <g class="key" transform="matrix(0.9484 0 0.0202 0.4137 627.18 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">M</text></g>
+    <g class="key" transform="matrix(0.9484 0 0.0363 0.4137 680.92 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">,</text></g>
+    <g class="key" transform="matrix(0.9484 0 0.0525 0.4137 734.66 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">.</text></g>
+    <g class="key" transform="matrix(0.9484 0 0.0686 0.4137 788.41 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">/</text></g>
+    <g class="key" transform="matrix(0.9484 0 0.0908 0.4137 862.30 701.81)"><use href="#keycap" transform="scale(1.7917 1)"/><text fill="#c7cbc9" font-size="14">shift</text></g>
+    <g class="key" transform="matrix(0.9484 0 0.1130 0.4137 936.20 701.81)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">↑</text></g>
+    <g class="key" transform="matrix(0.9596 0 -0.1157 0.4235 179.38 718.02)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9" font-size="14">fn</text></g>
+    <g class="key" transform="matrix(0.9596 0 -0.0991 0.4235 233.75 718.02)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9" font-size="14">ctrl</text></g>
+    <g class="key" transform="matrix(0.9596 0 -0.0826 0.4235 288.13 718.02)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9" font-size="14">meta</text></g>
+    <g class="key" transform="matrix(0.9596 0 -0.0661 0.4235 342.50 718.02)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9" font-size="14">alt</text></g>
+    <g class="key" transform="matrix(0.9596 0 -0.0083 0.4235 532.81 718.02)"><use href="#keycap" transform="scale(6.4231 1)"/><text fill="#c7cbc9"></text></g>
+    <g class="key" transform="matrix(0.9596 0 0.0496 0.4235 723.12 718.02)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9" font-size="14">alt</text></g>
+    <g class="key" transform="matrix(0.9596 0 0.0661 0.4235 777.50 718.02)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9" font-size="14">ctrl</text></g>
+    <g class="key" transform="matrix(0.9596 0 0.0826 0.4235 831.87 718.02)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">←</text></g>
+    <g class="key" transform="matrix(0.9596 0 0.0991 0.4235 886.25 718.02)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">↓</text></g>
+    <g class="key" transform="matrix(0.9596 0 0.1157 0.4235 940.62 718.02)"><use href="#keycap" transform="scale(0.9744 1)"/><text fill="#c7cbc9">→</text></g>
+  </g>
+  <path d="M177 634h-15l-34 96h17l32-96Zm766 0h15l34 96h-17l-32-96Z" fill="url(#speaker)"/>
+  <ellipse cx="520" cy="693.5" rx="6.5" ry="3.5" fill="#090a0c"/>
+  <ellipse cx="520" cy="692.5" rx="5.5" ry="3" fill="url(#point)"/>
+  <path d="M452.24 747.22L522.77 747.22L522.51 757.40L451.47 757.40Z" fill="#15181c" stroke="#4a4f57" stroke-width=".8"/>
+  <path d="M524.73 747.22L595.27 747.22L595.52 757.40L524.48 757.40Z" fill="#15181c" stroke="#4a4f57" stroke-width=".8"/>
+  <path d="M597.23 747.22L667.76 747.22L668.53 757.40L597.49 757.40Z" fill="#15181c" stroke="#4a4f57" stroke-width=".8"/>
+  <path d="M450.96 764.13L669.04 764.13L671.29 793.76L448.71 793.76Z" fill="#24272c" stroke="#535860" stroke-width=".9"/>
+  <circle cx="970" cy="628" r="7" fill="#16191d" stroke="#62676e"/>
+  <path d="M967 625a4 4 0 1 0 6 0m-3-3v5" stroke="#a5b7a2" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M537 799h48" stroke="#0c0e11" stroke-width="3" stroke-linecap="round"/>
+  <!-- Connector, case and label follow the same deck-plane projection. -->
+  <g id="usb-drive">
+    <path d="M1015.41 657.88L1020.88 657.88L1028.02 678.42L1022.46 678.42Z" fill="#08090a" stroke="#64676a"/>
+    <path d="M1017.81 660.56L1041.57 660.56L1047.78 677.68L1023.72 677.68Z" fill="url(#metal)" stroke="#797c7b" stroke-width=".7"/>
+    <path d="M1027.23 663.95L1031.81 663.95L1033.56 668.90L1028.96 668.90Z" fill="#434748"/>
+    <path d="M1035.47 663.95L1040.05 663.95L1041.84 668.90L1037.24 668.90Z" fill="#434748"/>
+    <path d="M1044.08 677.68L1047.78 677.68L1047.78 681.68L1044.08 681.68Z" fill="#656969"/>
+    <path d="M1042.99 680.38L1103.36 680.38L1103.36 686.38L1042.99 686.38Z" fill="#aa5b1c" stroke="#764315" stroke-width=".7"/>
+    <path d="M1092.74 654.02L1103.36 680.38L1103.36 686.38L1092.74 660.02Z" fill="#b86e24" stroke="#764315" stroke-width=".7"/>
+    <path d="M1033.55 654.02L1092.74 654.02L1103.36 680.38L1042.99 680.38Z" fill="url(#usb)" stroke="#e2a24e" stroke-width=".7"/>
+    <path d="M1040.66 658.56L1089.09 658.56L1095.91 675.68L1046.86 675.68Z" fill="#282621"/>
+    <text transform="matrix(0.9197 0 0.1480 0.3890 1068.11 667.07)" fill="#efefe9" font-family="Arial, sans-serif" font-size="7.6" font-weight="600" text-anchor="middle" dominant-baseline="central">THUNDERDEN</text>
+  </g>
+</svg>

@@ -15,6 +15,7 @@ import subprocess
 import time
 
 from playwright.sync_api import sync_playwright
+from browser_screen import capture_guest
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("output", type=Path)
@@ -22,6 +23,7 @@ parser.add_argument("--url", default="http://127.0.0.1:4173")
 parser.add_argument("--chromium")
 parser.add_argument("--seconds", type=int, default=60)
 parser.add_argument("--max-frame-age-ms", type=float, help="Optional median latency budget for a suitable test system")
+parser.add_argument("--max-p95-frame-age-ms", type=float, help="Optional p95 latency budget for a suitable test system")
 args = parser.parse_args()
 out = args.output.resolve()
 out.mkdir(parents=True, exist_ok=True)
@@ -50,7 +52,7 @@ with sync_playwright() as playwright:
             assert not errors, errors
             assert not page.locator("#status").inner_text().startswith("Stopped:")
             capture = out / "screen.png"
-            page.locator("#screen").screenshot(path=str(capture))
+            capture_guest(page, capture)
             ocr = subprocess.run(["tesseract", str(capture), "stdout", "--psm", "11"],
                                  capture_output=True, text=True, check=True).stdout
             (out / "screen.txt").write_text(ocr)
@@ -63,7 +65,6 @@ with sync_playwright() as playwright:
 
     try:
         page.goto(args.url)
-        page.locator("#boot").click()
         page.wait_for_function("!document.querySelector('#camera').disabled", timeout=60000)
         page.locator("#camera").click()
         page.wait_for_function("document.querySelector('#camera').textContent === 'Stop camera'")
@@ -145,9 +146,17 @@ with sync_playwright() as playwright:
         assert not page.locator("#status").inner_text().startswith("Stopped:")
         if args.max_frame_age_ms is not None:
             assert report["median_frame_age_ms"] <= args.max_frame_age_ms, "Camera frame age exceeded the test budget"
+        if args.max_p95_frame_age_ms is not None:
+            assert report["p95_frame_age_ms"] <= args.max_p95_frame_age_ms, "Camera p95 frame age exceeded the test budget"
         page.locator("#screen").focus()
         page.keyboard.press("Escape")
         wait_for("What would you like to do", timeout=60)
         print("PASS: measured numbered camera frames and cancelled the original scanner")
     finally:
+        (out / "browser-state.json").write_text(json.dumps({
+            "status": page.locator("#status").inner_text(),
+            "camera": page.locator("#camera-status").inner_text(),
+            "diagnostics": page.locator("#log").inner_text(),
+            "errors": errors,
+        }, indent=2))
         browser.close()
