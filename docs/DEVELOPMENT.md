@@ -34,6 +34,8 @@ packages in a virtual environment. Playwright can install its own Chromium with
 | `browser-startup.py` | None | Compressed downloads, progress, caching, boot cover and error handling |
 | `browser-boot.py` | `tesseract` | Actual guest boot, menu navigation and keyboard focus/release |
 | `browser-camera.py` | `ffmpeg`, `qrencode`, `tesseract` | Static QR/address verification, permissions and camera lifecycle |
+| `browser-camera-access.py` | `ffmpeg`, `qrencode`, `tesseract` | On-demand access, timeout-safe waiting, guest cancellation and recoverable errors; requires a SeedQR-enabled release URL |
+| `browser-camera-usb.py` | `tesseract` | Diagnostic: real guest errors after virtual USB unplug and whether replug restores QR/randomness capture, without injected Esc |
 | `browser-animated-psbt.py` | Pillow, `qrencode`, `tesseract` | Animated transaction QR decoding and review; cancels without signing |
 | `browser-camera-latency.py` | `tesseract` | Camera-frame age and complete frame changes using numbered video |
 | `browser-camera-entropy.py` | `tesseract` | Synthetic camera collection and cancellation before word generation |
@@ -53,6 +55,9 @@ python3 tests/browser-camera.py test-results/camera
 python3 tests/browser-animated-psbt.py test-results/animated-psbt
 python3 tests/browser-camera-latency.py test-results/camera-latency --seconds 120
 python3 tests/browser-camera-entropy.py test-results/camera-collection
+# For a separately prepared, unchanged SeedQR-enabled release bundle:
+python3 tests/browser-camera-access.py test-results/camera-access --url http://127.0.0.1:4173/assets/seedqr-demo/index.html
+python3 tests/browser-camera-usb.py test-results/camera-usb --url http://127.0.0.1:4173/assets/seedqr-demo/index.html
 ```
 
 The camera scripts use Chromium's synthetic webcam through the real
@@ -90,10 +95,40 @@ YUYV frames at a target of 10 fps and presents them through a USB 2 EHCI control
 EHCI is the tested browser configuration; xHCI guest scanning remains unresolved.
 Target frame rates do not guarantee guest throughput or camera-frame freshness.
 
-Stopping browser capture releases the device and replaces the host's latest
-frame with black. Frames already buffered in the emulator or guest may still
-arrive. Hiding the preview does not stop capture. The illustrated webcam LED
-shows whether browser capture is active, not whether the guest is reading frames.
+The emulator reports guest streaming requests through `VIDEO_STREAMING` QMP
+events. If capture is off, the page pauses the VM and shows an in-screen prompt;
+it does not call `getUserMedia()` until the user chooses **Enable camera**.
+The VM remains paused through permission and camera startup, so waiting does not
+consume the guest's camera timeout. **Cancel** resumes it and sends Esc to cancel
+the guest operation. QMP accepts keyboard events only while the VM is running.
+The prompt dims and blurs the current guest framebuffer, including genuine black
+camera-startup screens. No preceding menu screenshot is substituted.
+
+The webcam remains attached when browser capture is off. USB hotplug is not a
+drop-in substitute for guest cancellation: the signer grants access to existing
+camera device nodes before dropping root privileges; replacement nodes created
+after replug do not inherit that setup. The USB diagnostic records native errors
+and whether a tested image can reopen a replacement device. Cancelling through
+Esc preserves the original device and its permissions. This depends on the guest
+retaining Esc as its cancellation binding, not on menu text or numbering.
+
+The `ready=/camera.ready` backend option separates capture readiness from image
+content. The page writes byte `0` before stopping/clearing capture, and byte `1`
+only after publishing a complete frame. Not-ready reads are normal underruns,
+not backend failures. A black frame is valid video, not an error signal.
+`VIDEO_FRAME` acknowledges the first complete frame handed to the emulated USB
+camera; `VIDEO_ERROR` reports a backend read failure. Neither event proves that
+the guest decoded a QR code. A missing initial delivery acknowledgment produces
+a recoverable prompt rather than claiming the camera is absent.
+
+Stopping browser capture releases the device, clears readiness and replaces the
+host's latest frame with black. It also cancels an active guest camera step.
+Frames already buffered in the emulator or guest may still arrive. Cancellation
+of pending permission stops any stream granted later; browser permission dialogs
+themselves cannot be dismissed by the page. Hiding the preview does not stop
+capture. The illustrated webcam LED shows active browser capture, not guest use
+or QR-decoding success. Permission, missing-device and busy/system errors are
+best-effort browser classifications, not precise hardware diagnoses.
 
 The emulator's Docker builder includes the Emscripten
 [#26582](https://github.com/emscripten-core/emscripten/pull/26582) synchronous-proxy
@@ -105,13 +140,20 @@ for build commands and its standalone runtime smoke test.
 
 ## Image loading and boot
 
-`web/release.js` pins the release URL and SHA-256. Both setup and the browser
-verify the image. The browser then reads `/bzImage` from its FAT32 boot partition
+`web/release.js` pins the release URL, SHA-256, full byte size and `contentBytes`
+(the byte after the last non-zero byte). Setup checks this loading-progress
+metadata against the verified image. Both setup and the browser verify the whole
+image. The browser then reads `/bzImage` from its FAT32 boot partition
 without changing the image, and uses QEMU's `-kernel` option to boot it directly.
 The root filesystem and applications are already built into that kernel; no
 extra initramfs or separate kernel download is needed. The original image remains
 attached as a read-only virtio disk. Direct boot skips GRUB and does not validate
 the USB bootloader, UEFI or Secure Boot.
+
+The kernel reader also supports the newer shared-kernel layout, where
+`/EFI/BOOT/BOOTX64.EFI` is the EFI-stub Linux kernel used by both boot paths and
+there is no separate `/bzImage`. It reads that original payload without changing
+it. This compatibility does not change the default pinned preview.8 image.
 
 The single-CPU profile disables ACPI and uses the kernel options:
 
@@ -123,11 +165,17 @@ The page covers quiet startup until the pinned release's public network-menu
 title and completed footer appear in two consecutive emulator frames. Recognition
 depends on the 640×480 VGA8x16 layout. It only reveals the original screen; it does
 not render a replacement guest interface. **Show boot details** and manual control
-remain available if recognition fails. The displayed time hint is not a deadline.
+remain available if recognition fails. The boot bar is explicitly estimated:
+it follows elapsed time for the usual ten-second startup, then quietly becomes an
+indeterminate activity indicator. The main card shows neither phase captions nor
+an elapsed-seconds counter; the bar retains an accessible description of the
+estimate and elapsed time. It never declares the guest ready because time elapsed.
+Only actual ready-screen recognition completes the bar; manual takeover does not.
+The estimate is not a deadline.
 
-Changes to the pinned release need review of the checksum, boot-kernel reader,
-menu markers and integration fixtures. Do not update the hash alone or change the
-guest image to accommodate the demo.
+Changes to the pinned release need review of the checksum, byte sizes,
+boot-kernel reader, menu markers and integration fixtures. Do not update the hash
+alone or change the guest image to accommodate the demo.
 
 ## Static hosting requirements
 
@@ -146,13 +194,25 @@ explicitly: a host may not compress `application/octet-stream` by default. The
 browser must receive the original decoded image bytes, not an application-level
 archive or a modified image.
 
-The local server supplies `X-Uncompressed-Content-Length` so progress can count
-decoded bytes even with HTTP compression. This optional header is not the
-compressed transfer size or an estimate of time remaining. Without a usable
-decoded size, the page reports bytes loaded without inventing a percentage.
-The zero-filled part of the disk image compresses well, so progress can move
-quickly near the end. The Wasm module is compiled while downloading and reused
-when initializing the emulator.
+The local server supplies `X-Uncompressed-Content-Length` for the original file
+sizes, not compressed transfer sizes or estimates of time remaining. Total sizes
+appear in the labels, with percentages beside the bars and no additional heading
+spinner. The pinned image bar stays empty while connecting, rather than showing
+an indeterminate sweep that resets when the response arrives. Image loading uses the
+pinned `contentBytes` rather than the padded disk capacity as its progress target;
+once reached, the last measured fill stays in place through the trailing empty
+space and full checksum verification, without retracting or switching to
+indeterminate activity. Image status text is limited to percentages, with
+100% shown after verification; transient phase names and completion timings are
+not rendered. Its percentage column keeps a fixed width and height to avoid
+layout flicker. This changes the indicator only: no bytes are skipped, trimmed or
+replaced. The image's full size remains visible in its label.
+
+Emulator loading retains its right-hand phase/status text and **Ready** timing,
+and uses its full decoded size. Without a known decoded size, it
+stays indeterminate rather than inventing a percentage; its size can be shown
+once the response completes. The Wasm module is compiled while downloading and
+reused when initializing the emulator.
 
 Use ETags or another consistent cache policy. Version assets together to avoid
 mixing an old loader with a new Wasm binary or release image. Browsers may decline

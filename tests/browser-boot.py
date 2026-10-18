@@ -37,6 +37,8 @@ with sync_playwright() as playwright:
         page.goto(args.url)
         assert page.locator("#camera").is_disabled()
         assert page.locator("#boot-cover").is_visible()
+        assert page.locator("#keyboard-prompt").is_hidden()
+        assert page.locator("#boot-cover #keyboard-instructions").count() == 0
 
         def wait_for(text, name, timeout=600):
             deadline = time.monotonic() + timeout
@@ -65,6 +67,12 @@ with sync_playwright() as playwright:
         assert page.locator("#screen").get_attribute("data-keyboard") == "released"
         assert page.locator("#screen").evaluate("screen => document.activeElement !== screen")
         assert page.locator("#keyboard-prompt").is_visible()
+        assert page.locator("#screen").get_attribute("tabindex") == "-1"
+        guide = page.locator("#keyboard-prompt").inner_text()
+        assert "Thunder Den is ready" in guide and "Click outside" in guide
+        assert "capture keyboard input" in guide
+        assert "navigate" in guide and "Esc" in guide and "Use keyboard" not in guide
+        assert page.locator("#keyboard-prompt").evaluate("prompt => getComputedStyle(prompt).backdropFilter") == "blur(2px)"
         assert page.evaluate("""() => {
             const screen = document.querySelector('#screen').getBoundingClientRect();
             const prompt = document.querySelector('#keyboard-prompt').getBoundingClientRect();
@@ -95,18 +103,24 @@ with sync_playwright() as playwright:
         if args.max_frame_interval_ms is not None:
             assert median <= args.max_frame_interval_ms, f"Display refresh exceeded {args.max_frame_interval_ms} ms: {median:.1f} ms"
         # Mouse focus must show the orange border before any key is pressed.
-        page.evaluate("""async () => {
-            const { Qmp } = await import('./qmp.js');
-            const command = Qmp.prototype.command;
-            window.testInputEvents = [];
-            Qmp.prototype.command = function(name, args, ...rest) {
-                if (name === 'input-send-event') window.testInputEvents.push(...args.events);
-                return command.call(this, name, args, ...rest);
-            };
-        }""")
-        page.locator("#keyboard-prompt").click()
+        def observe_input():
+            page.evaluate("""async () => {
+                const { Qmp } = await import('./qmp.js');
+                const command = Qmp.prototype.command;
+                window.testInputEvents = [];
+                Qmp.prototype.command = function(name, args, ...rest) {
+                    if (name === 'input-send-event') window.testInputEvents.push(...args.events);
+                    return command.call(this, name, args, ...rest);
+                };
+            }""")
+
+        observe_input()
+        # The entire display is clickable, not just the instruction text.
+        page.locator("#keyboard-prompt").click(position={"x":12,"y":12})
         assert page.locator("#screen").get_attribute("data-keyboard") == "active"
         assert page.locator("#keyboard-prompt").is_hidden()
+        assert page.locator("#screen").get_attribute("tabindex") == "0"
+        assert page.locator("#screen").evaluate("screen => getComputedStyle(screen).filter") == "none"
         assert page.locator("#screen").evaluate("screen => getComputedStyle(screen).outlineColor") == "rgb(223, 156, 67)"
         assert page.evaluate("window.testInputEvents.length") == 0
         assert "Click outside" in page.locator("#keyboard-status").inner_text()
@@ -142,7 +156,23 @@ with sync_playwright() as playwright:
         page.keyboard.press("Escape")
         wait_for("What would you like to do", "returned-to-menu", timeout=60)
         assert page.evaluate("document.querySelector('#camera-video').srcObject === null")
+        for activation in ("Enter", "Space"):
+            page.reload()
+            page.wait_for_function("document.querySelector('#screen').dataset.ready === 'true'", timeout=90000)
+            assert page.locator("#keyboard-prompt").is_visible()
+            observe_input()
+            page.locator("#about").focus()
+            page.keyboard.press("Tab")
+            assert page.locator("#keyboard-prompt").evaluate("prompt => document.activeElement === prompt")
+            page.keyboard.press(activation)
+            assert page.locator("#keyboard-prompt").is_hidden()
+            assert page.locator("#screen").get_attribute("data-keyboard") == "active"
+            assert page.evaluate("window.testInputEvents") == [], "Help activation reached the guest"
+            page.locator(".scene").click(position={"x":5,"y":5})
+            assert page.locator("#keyboard-prompt").is_hidden(), "Help returned after releasing focus"
+            assert page.locator("#screen").get_attribute("data-keyboard") == "released"
         print("PASS: real guest navigation; click-to-focus border, outside-click release and held-key cleanup")
+        print("PASS: one-time ready guidance; pointer, Enter and Space activation do not forward input to the guest")
     except Exception:
         print(json.dumps({
             "status": page.locator("#status").inner_text(),

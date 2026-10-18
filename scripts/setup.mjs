@@ -41,6 +41,9 @@ try {
   if (createHash('sha256').update(bytes).digest('hex') !== RELEASE.sha256) {
     throw new Error('Image checksum mismatch. Only the pinned, unchanged preview.8 release is accepted.');
   }
+  if (bytes.length !== RELEASE.bytes || bytes.findLastIndex(byte => byte !== 0) + 1 !== RELEASE.contentBytes) {
+    throw new Error('Pinned image progress metadata does not match the verified image.');
+  }
   await mkdir(new URL('web/assets/', root), { recursive: true });
   await writeFile(imagePath, bytes);
   console.log('Emulator assets copied and Thunderden image checksum verified. Run: npm start');

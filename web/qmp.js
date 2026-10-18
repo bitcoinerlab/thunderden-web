@@ -1,6 +1,6 @@
 // QMP controls the emulator itself. No agent or other code is added to the guest.
 export class Qmp {
-  constructor(onLog = () => {}) {
+  constructor(onLog = () => {}, onEvent = () => {}) {
     this.input = [];
     this.readers = new Set();
     this.pending = new Map();
@@ -9,6 +9,7 @@ export class Qmp {
     this.decoder = new TextDecoder();
     this.greeting = new Promise(resolve => { this.greet = resolve; });
     this.onLog = onLog;
+    this.onEvent = onEvent;
     const self = this;
     this.pty = {
       get readable() { return self.input.length > 0; },
@@ -40,6 +41,7 @@ export class Qmp {
       try { message = JSON.parse(line); }
       catch { this.onLog(line); continue; }
       if (message.QMP) this.greet(message.QMP);
+      if (message.event && !this.closed) this.onEvent(message);
       const pending = this.pending.get(message.id);
       if (!pending) continue; // Greeting or asynchronous VM event.
       this.pending.delete(message.id);

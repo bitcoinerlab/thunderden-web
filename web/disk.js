@@ -1,4 +1,4 @@
-// Read the existing bzImage from the verified release's FAT32 boot partition.
+// Read the existing Linux kernel from the verified image's FAT32 boot partition.
 // No disk bytes are changed and no extra kernel or initramfs is supplied.
 export function readBootKernel(image) {
   const invalid = () => new Error('Invalid release boot partition');
@@ -28,28 +28,40 @@ export function readBootKernel(image) {
     }
   }
 
-  const missing = () => new Error('Release image has no embedded bzImage kernel');
-  for (const directory of clusters(view.getUint32(volume + 44, true))) {
-    for (let entry = directory; entry < directory + clusterBytes; entry += 32) {
-      if (image[entry] === 0) throw missing();
-      if (image[entry] === 0xe5 || image[entry + 11] & 0x18) continue;
-      if (new TextDecoder().decode(image.subarray(entry, entry + 11)) !== 'BZIMAGE    ') continue;
-      const size = view.getUint32(entry + 28, true);
-      if (size < 0x206 || size > image.length) throw invalid();
-      const first = view.getUint16(entry + 20, true) * 65536 + view.getUint16(entry + 26, true);
-      const kernel = new Uint8Array(size);
-      let copied = 0;
-      for (const offset of clusters(first)) {
-        const length = Math.min(clusterBytes, size - copied);
-        kernel.set(image.subarray(offset, offset + length), copied);
-        copied += length;
-        if (copied === size) break;
+  function find(first, name, directory = false) {
+    for (const offset of clusters(first)) {
+      for (let entry = offset; entry < offset + clusterBytes; entry += 32) {
+        if (image[entry] === 0) return;
+        const attributes = image[entry + 11];
+        if (image[entry] === 0xe5 || attributes & 0x08 || Boolean(attributes & 0x10) !== directory) continue;
+        if (new TextDecoder().decode(image.subarray(entry, entry + 11)) !== name) continue;
+        return { first: view.getUint16(entry + 20, true) * 65536 + view.getUint16(entry + 26, true),
+          size: view.getUint32(entry + 28, true) };
       }
-      if (copied !== size || new DataView(kernel.buffer).getUint32(0x202, true) !== 0x53726448) {
-        throw new Error('Invalid or truncated embedded Linux kernel');
-      }
-      return kernel;
     }
   }
-  throw missing();
+
+  const root = view.getUint32(volume + 44, true);
+  let file = find(root, 'BZIMAGE    ');
+  if (!file) {
+    // New images share this EFI-stub Linux kernel between BIOS and UEFI boot.
+    const efi = find(root, 'EFI        ', true);
+    const boot = efi && find(efi.first, 'BOOT       ', true);
+    file = boot && find(boot.first, 'BOOTX64 EFI');
+  }
+  if (!file) throw new Error('Release image has no embedded bzImage/EFI Linux kernel');
+  const { first, size } = file;
+  if (size < 0x206 || size > image.length) throw invalid();
+  const kernel = new Uint8Array(size);
+  let copied = 0;
+  for (const offset of clusters(first)) {
+    const length = Math.min(clusterBytes, size - copied);
+    kernel.set(image.subarray(offset, offset + length), copied);
+    copied += length;
+    if (copied === size) break;
+  }
+  if (copied !== size || new DataView(kernel.buffer).getUint32(0x202, true) !== 0x53726448) {
+    throw new Error('Invalid or truncated embedded Linux kernel');
+  }
+  return kernel;
 }

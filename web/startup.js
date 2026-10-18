@@ -1,4 +1,16 @@
 // HTTP handles compression and caching. Fetch exposes the decoded file bytes.
+export function loadingProgress(loaded, total, contentBytes = total) {
+  return {
+    value: contentBytes ? Math.min(loaded / contentBytes, 1) : undefined,
+    finishing: Boolean(contentBytes && contentBytes < total && loaded >= contentBytes),
+  };
+}
+
+// Elapsed time is only an estimate. Only actual guest readiness can finish boot.
+export function estimatedBootProgress(seconds) {
+  return seconds < 10 ? seconds / 10 : undefined;
+}
+
 export async function fetchAsset(path, { signal, onProgress = () => {} } = {}) {
   const response = await fetch(path, { signal });
   if (!response.ok) throw new Error(`Cannot load ${path}. Run npm run setup first.`);

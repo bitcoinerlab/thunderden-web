@@ -61,28 +61,45 @@ button:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px soli
 #screen[data-keyboard="active"] { outline: 2px solid #df9c43; outline-offset: 3px; }
 #boot-cover { position: absolute; inset: 0; padding: clamp(12px, 3cqh, 24px); display: grid; place-items: center; background: #191a18; }
 .boot-card { width: min(560px, 100%); max-height: 100%; overflow: auto; scrollbar-width: thin; text-align: center; }
-.boot-mark { margin: 0 0 12px; color: #f0a441; letter-spacing: .16em; font-size: 13px; font-weight: 650; }
-.boot-heading { display: flex; justify-content: center; align-items: center; gap: 14px; }
 #boot-title { margin: 0; font-size: clamp(22px, 4.5cqw, 30px); line-height: 1.2; font-weight: 500; }
-.boot-spinner { flex: 0 0 auto; width: 34px; height: 34px; border: 3px solid #444640; border-top-color: #eea54c; border-radius: 50%; animation: boot-spin 1s linear infinite; }
 #boot-message { margin: 14px 0; color: #b5b5ad; font-size: 16px; }
 .boot-card:has(#startup:not([hidden])) #boot-message { display: none; }
 #boot-estimate { margin: 18px 0 10px; color: #b5b5ad; font-size: 16px; }
-#boot-elapsed { margin: 0; color: #b5b5ad; font-size: 16px; font-variant-numeric: tabular-nums; }
+#boot-estimate span { display: inline-block; max-width: 100%; vertical-align: top; }
+#boot-progress { width: min(360px, 100%); margin: 18px auto 0; }
+#boot-progress-bar { display: block; width: 100%; height: 9px; accent-color: #e6a14a; }
 #startup { margin-top: 16px; text-align: left; font-size: 15px; color: #babdb3; }
 #startup ol { padding: 0; margin: 0; list-style: none; }
 #startup li { margin: 0 0 12px; }
 #startup label { display: block; font-size: 15px; }
 #startup progress { display: block; width: 100%; height: 9px; margin: 5px 0; accent-color: #e6a14a; }
 #startup small { display: block; color: #b5b5ad; font-size: 14px; }
+.asset-size { white-space: nowrap; }
+.asset-progress { display: flex; align-items: center; gap: 12px; }
+.asset-progress progress { flex: 1; min-width: 0; }
+.asset-progress small { flex: 0 0 auto; text-align: right; white-space: nowrap; }
+#startup-image .asset-progress small { flex-basis: 5ch; min-height: 1.45em; }
 #startup [data-state="done"] label { color: #b1bdaa; }
 #startup [data-state="error"] small { color: #f4ad70; }
-#keyboard-guide { margin-top: 18px; padding: 12px; border: 1px solid #45483f; border-radius: 6px; background: #20221d; }
-#keyboard-instructions { margin: 0; color: #efefe9; font-size: 18px; line-height: 1.4; }
+#keyboard-prompt { position: absolute; inset: 0; display: grid; place-items: center; width: 100%; height: 100%; padding: clamp(12px, 3cqw, 24px); border: 0; border-radius: inherit; background: #05060866; backdrop-filter: blur(2px); color: #efefe9; text-align: center; }
+#keyboard-guide { display: block; width: min(440px, 100%); padding: 24px; border: 1px solid #62665d; border-radius: 10px; background: #20221df5; box-shadow: 0 8px 28px #0005; }
+.keyboard-ready { display: block; margin-bottom: 14px; font-size: 22px; font-weight: 550; }
+#keyboard-instructions { display: block; color: #efefe9; font-size: 18px; line-height: 1.6; }
 #keyboard-instructions strong { font-weight: 600; }
-.guide-keys { margin: 8px 0 0; color: #b5b5ad; font-size: 14px; }
+.guide-keys { display: block; margin-top: 16px; color: #b5b5ad; font-size: 14px; line-height: 1.6; }
 #keyboard-guide kbd { color: #efefe9; }
-#keyboard-prompt { position: absolute; left: 50%; bottom: 20%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); padding: 12px 18px; border: 1px solid #df9c43; border-radius: 6px; background: #20221df2; color: #efefe9; font-size: 18px; line-height: 1.4; box-shadow: 0 4px 18px #0006; }
+#keyboard-prompt:hover #keyboard-guide { border-color: #df9c43; }
+#keyboard-prompt:focus-visible { outline: none; }
+#keyboard-prompt:focus-visible #keyboard-guide { outline: 2px solid #df9c43; outline-offset: 4px; }
+#camera-request { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; padding: 14px; background: #05060899; backdrop-filter: blur(2px); }
+.camera-card { width: min(460px, 100%); max-height: 100%; overflow: auto; padding: 22px; border: 1px solid #62665d; border-radius: 10px; background: #20221d; color: #efefe9; text-align: center; }
+.camera-card h2 { margin: 0 0 12px; font-size: 20px; font-weight: 550; }
+.camera-card p { margin: 10px 0; font-size: 14px; line-height: 1.5; }
+.camera-card .camera-local { color: #b5b5ad; font-size: 12px; }
+#camera-fallback { color: #c5c8bf; }
+.camera-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.camera-actions button { padding: 8px 16px; border: 1px solid #62665d; border-radius: 6px; background: #282b25; color: #efefe9; }
+#camera-enable { border-color: #df9c43; background: #df9c43; color: #191a18; }
 #boot-controls { position: absolute; right: 10px; bottom: 8px; z-index: 2; }
 #boot-details { border: 0; border-radius: 4px; padding: 6px 8px; background: #191a18dd; color: #b5b5ad; text-decoration: underline; font-size: 14px; }
 #boot-error { color: #ffbd83; font-size: 16px; overflow-wrap: anywhere; }
@@ -91,6 +108,7 @@ button:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px soli
 .page-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 11px; color: #79746b; }
 .warning { margin: 0; color: #83512d; }
 .hint { margin: 0; text-align: right; }
+body:has(#screen[data-ready="false"]) .hint, body:has(#camera-request:not([hidden])) .hint { visibility: hidden; }
 .keyboard-help { text-align: right; }
 #keyboard-status { margin: 0 0 3px; font-size: 14px; color: #57534b; }
 body:has(#screen[data-keyboard="active"]) #keyboard-status { color: #8a571a; }
@@ -110,26 +128,22 @@ dialog form { float: right; }
 dialog a { color: #80521e; }
 #diagnostics { font-size: 12px; margin-top: 18px; }
 #log { max-height: 230px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.5 monospace; color: #625e54; }
-@keyframes boot-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .boot-spinner { animation: none; } }
 @container (max-height: 479px) {
   #screen { image-rendering: auto; }
 }
-@container (max-height: 430px) {
-  .boot-mark { display: none; }
-}
 @container (max-height: 340px) {
   #boot-cover { padding: 10px; }
-  .boot-mark { display: none; }
   #boot-title { font-size: 22px; }
-  .boot-spinner { width: 30px; height: 30px; }
-  #boot-message { display: none; }
+  #boot-message { margin: 10px 0; font-size: 14px; }
+  #boot-progress { margin-top: 12px; }
+  #boot-estimate { margin-top: 12px; margin-bottom: 8px; }
   #startup { margin-top: 10px; }
   #startup li { margin-bottom: 6px; }
   #startup label { font-size: 14px; }
   #startup small { font-size: 13px; }
-  #boot-estimate, #boot-elapsed { font-size: 14px; }
-  #keyboard-guide { margin-top: 12px; padding: 8px; }
+  #boot-estimate { font-size: 14px; }
+  #keyboard-guide { padding: 16px; }
+  .keyboard-ready { font-size: 20px; }
   #keyboard-instructions { font-size: 15px; }
   .guide-keys { font-size: 13px; }
 }
@@ -140,10 +154,11 @@ dialog a { color: #80521e; }
   #startup label, #startup small { font-size: 12px; }
   #startup progress { height: 8px; margin-block: 3px; }
   #boot-estimate { margin-top: 10px; }
-  #keyboard-guide { margin-top: 8px; }
+  #keyboard-guide { padding: 10px; }
+  .keyboard-ready { margin-bottom: 10px; font-size: 18px; }
   #keyboard-instructions { font-size: 13px; }
-  #keyboard-prompt { font-size: 15px; padding: 10px 12px; }
-  .guide-keys { display: none; }
+  #keyboard-prompt { padding: 10px; }
+  .guide-keys { margin-top: 10px; font-size: 12px; }
 }
 @media (max-width: 700px), (max-height: 560px) {
   body { padding: 12px; gap: 10px; }

@@ -1,7 +1,28 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
-import { fetchAsset, verifyImage } from '../web/startup.js';
+import { estimatedBootProgress, fetchAsset, loadingProgress, verifyImage } from '../web/startup.js';
+
+test('image loading progress excludes trailing padding without changing the full size', () => {
+  const mib = 1024 * 1024;
+  assert.deepEqual(loadingProgress(8 * mib, 64 * mib, 16 * mib), { value: .5, finishing: false });
+  assert.deepEqual(loadingProgress(16 * mib, 64 * mib, 16 * mib), { value: 1, finishing: true });
+  assert.deepEqual(loadingProgress(48 * mib, 64 * mib, 16 * mib), { value: 1, finishing: true });
+});
+
+test('emulator progress uses its complete decoded size and unknown sizes stay indeterminate', () => {
+  assert.deepEqual(loadingProgress(50, 100), { value: .5, finishing: false });
+  assert.deepEqual(loadingProgress(100, 100), { value: 1, finishing: false });
+  assert.deepEqual(loadingProgress(50, 0), { value: undefined, finishing: false });
+});
+
+test('the ten-second estimate never completes boot and becomes indeterminate afterwards', () => {
+  assert.equal(estimatedBootProgress(0), 0);
+  assert.equal(estimatedBootProgress(6), .6);
+  assert.ok(estimatedBootProgress(9.999) < 1);
+  assert.equal(estimatedBootProgress(10), undefined);
+  assert.equal(estimatedBootProgress(120), undefined);
+});
 
 test('count decoded bytes, not the compressed HTTP Content-Length', async t => {
   const original = new TextEncoder().encode('Public fixture\0'.repeat(1000));
@@ -76,4 +97,13 @@ test('verification accepts only the expected uncompressed image hash', async () 
   const expected = createHash('sha256').update(bytes).digest('hex');
   await verifyImage(bytes, expected);
   await assert.rejects(verifyImage(bytes, '0'.repeat(64)), /image checksum mismatch/);
+});
+
+test('full-image verification still rejects changes inside the excluded padding', async () => {
+  const image = new Uint8Array(1024);
+  image.set(new TextEncoder().encode('Public image fixture'));
+  const expected = createHash('sha256').update(image).digest('hex');
+  await verifyImage(image, expected);
+  image[1023] = 1;
+  await assert.rejects(verifyImage(image, expected), /image checksum mismatch/);
 });

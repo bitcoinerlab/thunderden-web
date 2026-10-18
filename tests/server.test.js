@@ -16,7 +16,7 @@ test('serve the page with shared-memory headers but not files outside web/', asy
     assert.equal(page.headers.get('cache-control'), 'no-cache');
     const etag = page.headers.get('etag');
     assert.ok(etag);
-    assert.match(await page.text(), /Preparing Thunderden/);
+    assert.match(await page.text(), /Loading Thunder Den/);
     const cached = await fetch(base, { headers: { 'If-None-Match': etag } });
     assert.equal(cached.status, 304);
     assert.equal(cached.headers.get('cross-origin-embedder-policy'), 'require-corp');

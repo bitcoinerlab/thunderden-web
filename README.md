@@ -61,11 +61,15 @@ input. Use the arrow keys, Enter and Esc to navigate, and type normally when
 asked. The screen has an orange outline while the keyboard is active. Click
 outside the screen to release it. Keyboard mapping assumes a US layout.
 
-For QR scanning, choose **Enable camera** and grant browser permission before
-selecting **Scan a QR code** inside Thunder Den. Camera access is optional; the
-page never requests a microphone. Video frames are processed in your browser,
-not uploaded. **Stop camera** releases the camera; **Hide preview** only hides
-the preview and leaves capture running. Only use public test QR codes.
+When Thunder Den needs the camera, the page asks you to **Enable camera**.
+Only that button requests browser permission. Images stay on your device, and
+the virtual computer waits while you decide. **Cancel** cancels the camera step
+inside Thunder Den, so you can use manual entry instead. Without a camera, you
+can still enter public test recovery words, view public keys and display QR codes.
+
+You can also enable the camera from the toolbar in advance. **Stop camera**
+releases it and cancels any active camera step; **Hide preview** only hides the
+preview and leaves capture running. Only use public test QR codes.
 
 **Restart** discards the virtual computer and boots it again. **About** contains
 background information and emulator diagnostics. During startup, **Show boot

@@ -35,6 +35,38 @@ test('extract the existing kernel across fragmented FAT clusters without changin
   assert.deepEqual(image, original);
 });
 
+function sharedKernelFixture() {
+  const result = fixture();
+  const { image, view } = result;
+  const file = image.slice(1536, 1568);
+  image.fill(0, 1536, 1568);
+  for (const [entry, name, first] of [[1536, 'EFI        ', 4], [2560, 'BOOT       ', 6]]) {
+    image.set(new TextEncoder().encode(name), entry);
+    image[entry + 11] = 0x10;
+    view.setUint16(entry + 26, first, true);
+    view.setUint32(1024 + first * 4, 0x0fffffff, true);
+  }
+  image.set(file, 3584);
+  image.set(new TextEncoder().encode('BOOTX64 EFI'), 3584);
+  return result;
+}
+
+test('extract the shared EFI-stub Linux kernel without a separate root bzImage', () => {
+  const { image, kernel } = sharedKernelFixture();
+  const original = image.slice();
+  assert.deepEqual(readBootKernel(image), kernel);
+  assert.deepEqual(image, original);
+});
+
+test('require real EFI directories and validate the shared Linux payload', () => {
+  const notDirectory = sharedKernelFixture();
+  notDirectory.image[1536 + 11] = 0x20;
+  assert.throws(() => readBootKernel(notDirectory.image), /no embedded/);
+  const badKernel = sharedKernelFixture();
+  badKernel.image[3074] = 0;
+  assert.throws(() => readBootKernel(badKernel.image), /embedded Linux/);
+});
+
 test('reject a missing kernel instead of substituting another payload', () => {
   const { image } = fixture();
   image[1536] = 0;

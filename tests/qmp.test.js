@@ -33,6 +33,18 @@ test('terminal input wakes readers and produces complete QMP commands', async ()
   await result;
 });
 
+test('structured camera events are delivered separately from command responses', async () => {
+  const events = [];
+  const qmp = new Qmp(() => {}, event => events.push(event));
+  const response = qmp.command('query-status');
+  qmp.receive(bytes('{"event":"VIDEO_STREAMING","data":{"id":"cam0","active":true}}\n{"return":{"running":true},"id":1}\n'));
+  assert.deepEqual(await response, { running: true });
+  assert.deepEqual(events, [{ event: 'VIDEO_STREAMING', data: { id: 'cam0', active: true } }]);
+  qmp.close(new Error('Stopped'));
+  qmp.receive(bytes('{"event":"VIDEO_FRAME","data":{"id":"cam0"}}\n'));
+  assert.equal(events.length, 1);
+});
+
 test('surface QMP errors and timeouts rather than hanging the page', async () => {
   const qmp = new Qmp();
   const error = qmp.command('invalid');

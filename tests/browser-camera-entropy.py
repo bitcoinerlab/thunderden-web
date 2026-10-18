@@ -69,7 +69,7 @@ with sync_playwright() as playwright:
         page.locator("#camera").click()
         page.wait_for_function("document.querySelector('#camera-led').dataset.active === 'true'")
         wait_for("Choose a Bitcoin network")
-        page.locator("#screen").click()
+        page.locator("#keyboard-prompt").click()
         for key, expected in [
             ("4", "What would you like to do"),  # Regtest; no coins or wallet.
             ("1", "Generate new recovery words"),
