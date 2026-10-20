@@ -12,6 +12,15 @@ function isolated(response) {
   assert.equal(response.headers.get('Cross-Origin-Opener-Policy'), 'same-origin');
   assert.equal(response.headers.get('Cross-Origin-Embedder-Policy'), 'require-corp');
 }
+if (origin.protocol === 'https:' && origin.hostname === 'thunderden.com') {
+  const insecure = new URL('/', origin);
+  insecure.protocol = 'http:';
+  const response = await request(insecure, { redirect: 'manual' });
+  await response.body?.cancel();
+  assert.ok([301, 302, 307, 308].includes(response.status), 'HTTP must redirect to HTTPS before serving the website.');
+  assert.equal(new URL(response.headers.get('Location'), insecure).href, new URL('/', origin).href);
+  console.log('HTTP redirects to HTTPS.');
+}
 for (const [path, marker] of [['/', 'data-demo="website"'], ['/wallet-mockup/', 'id="seed-qr"'], ['/demo/', 'Browser demo · Preview 8']]) {
   const response = await request(path);
   assert.equal(response.status, 200, path);

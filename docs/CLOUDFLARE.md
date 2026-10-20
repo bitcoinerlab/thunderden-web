@@ -56,9 +56,13 @@ provisioning can take longer than the routing update; verify HTTPS before testin
 the browser demo. The phone link and QR follow the current origin, so the custom
 domain uses `https://thunderden.com/wallet-mockup/`.
 
-The HTTP check verifies decoded hashes, MIME types, isolation headers, HEAD,
-ETag/304 revalidation and missing assets. Then run the existing browser checks
-against the preview, for example:
+In the zone's **SSL/TLS > Edge Certificates** settings, enable **Always Use HTTPS**.
+A valid certificate alone does not redirect HTTP visits. This setting ensures
+visitors reach the secure origin required for camera access and shared memory.
+
+The HTTP check verifies the HTTPS redirect on `thunderden.com`, decoded hashes,
+MIME types, isolation headers, HEAD, ETag/304 revalidation and missing assets.
+Then run the existing browser checks against the preview, for example:
 
 ```sh
 python tests/browser-site.py test-results/cloudflare-layout --url https://your-preview.workers.dev/
