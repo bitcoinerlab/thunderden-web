@@ -136,7 +136,7 @@ body.website, body.wallet-page {
   .site-header { align-items: center; }
   .site-brand img { width: 150px; }
   .site-header nav { gap: 14px; }
-  .site-header nav a:first-child, .site-header nav a:nth-child(2) { display: none; }
+  .site-header nav a:first-child { display: none; }
   .site-intro h1 { font-size: 30px; }
   .site-intro > p { font-size: 14px; }
   .site-details { padding: 48px 24px; }
