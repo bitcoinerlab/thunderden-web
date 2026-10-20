@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="64" viewBox="0 0 200 64" fill="none">
+  <title>A phone wallet used with a Thunder Den laptop</title>
+  <ellipse cx="35" cy="61" rx="22" ry="2" fill="#222320" opacity=".08"/>
+  <ellipse cx="145" cy="61" rx="48" ry="2" fill="#222320" opacity=".08"/>
+  <g transform="rotate(-8 35 31)">
+    <rect x="21" y="3" width="28" height="55" rx="5" fill="#222320"/>
+    <rect x="23.5" y="8" width="23" height="44" rx="2" fill="#faf9f6"/>
+    <rect x="30" y="5.3" width="10" height="1.2" rx=".6" fill="#686b63"/>
+    <rect x="31" y="54.5" width="8" height="1" rx=".5" fill="#a8aba3"/>
+    <path d="M28 16h14M28 41h14M28 45h9" stroke="#dedfd8" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M29 24v-4h11v4" stroke="#ad6614" stroke-width="1.2" stroke-linejoin="round"/>
+    <rect x="27" y="24" width="16" height="12" rx="2" fill="#fff0d9" stroke="#ad6614" stroke-width="1.2"/>
+    <path d="M37 28h7v5h-7a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z" fill="#f7931a"/>
+    <circle cx="39" cy="30.5" r=".8" fill="#222320"/>
+  </g>
+  <g stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+    <path d="M61 25h29m-4-4 4 4-4 4" stroke="#f7931a"/>
+    <path d="M90 39H61m4-4-4 4 4 4" stroke="#a8aba3"/>
+  </g>
+  <path d="M108 7h74a4 4 0 0 1 4 4v35h-82V11a4 4 0 0 1 4-4Z" fill="#222320"/>
+  <rect x="108" y="12" width="74" height="30" rx="1" fill="#191a18"/>
+  <circle cx="145" cy="9.5" r=".7" fill="#686b63"/>
+  <g transform="translate(134 19) scale(.022)" fill="#efefe9">
+    <path d="M83.156 675C33.97 675 0 641.25 0 596.487C0 582.632 3.185 567.355 10.616 553.145L164.544 252.592C176.929 228.079 193.56 209.25 214.791 191.487L416.844 26.289C438.429 8.526 467.445 0 500 0C532.555 0 561.571 8.526 583.156 26.289L785.209 191.487C806.44 209.25 823.071 228.079 835.456 252.592L989.384 553.145C996.815 567.355 1000 582.632 1000 596.487C1000 641.25 966.03 675 916.844 675H646.851L573.956 516.197L661.713 377.289H501.062L543.171 141.039L291.578 512.645H425.69L353.149 675H83.156Z"/>
+  </g>
+  <path d="M104 46h82l10 11c0 2-2 3-4 3H98c-2 0-4-1-4-3l10-11Z" fill="#c1c4bb" stroke="#9b9f94" stroke-width=".8"/>
+  <path d="M111 49h68l5 5h-78l5-5Z" fill="#575b52"/>
+  <path d="M112 51h66M110 53h70" stroke="#8b9083" stroke-width=".6"/>
+  <path d="M136 55h18l2 3h-22l2-3Z" fill="#a8ada0"/>
+</svg>

@@ -113,11 +113,20 @@ to learn about the actual USB signer, its design and its own validation status.
 
 ## Development and hosting
 
-The JavaScript unit tests need only Node.js; there are no npm dependencies:
+The in-progress website preview is at **http://127.0.0.1:4173/site/**, with the
+original demo still at `/`. See [the website notes](docs/WEBSITE.md) to prepare its
+separately pinned local image and review the companion's current scope.
+
+Install the pinned development dependencies to run all JavaScript unit tests:
 
 ```sh
+npm ci
 npm test
 ```
+
+The phone walkthrough uses a checked-in browser bundle, not a runtime CDN.
+After changing its vendor entry point, run `npm run build:wallet`. To reproduce
+its public mainnet-format fixture, run `npm run fixture:wallet`.
 
 See the [development guide](docs/DEVELOPMENT.md) for browser test commands,
 integration details and static-host requirements. Hosting needs HTTPS, the

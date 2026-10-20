@@ -3,8 +3,11 @@ import { isNetworkMenu } from './boot-screen.js';
 import { readBootKernel } from './disk.js';
 import { qcode, readPpm } from './display.js';
 import { Qmp } from './qmp.js';
-import { RELEASE } from './release.js';
+import { RELEASE as DEFAULT_RELEASE } from './release.js';
 import { estimatedBootProgress, fetchAsset, loadingProgress, verifyImage } from './startup.js';
+
+const websiteDemo = document.body.dataset.demo === 'website';
+const RELEASE = websiteDemo ? (await import('./site/release.js')).RELEASE : DEFAULT_RELEASE;
 
 const screen = document.querySelector('#screen');
 const context = screen.getContext('2d');
@@ -60,7 +63,9 @@ function startGuestBoot() {
     else bootProgressBar.value = value;
   };
   document.querySelector('#boot-title').textContent = 'Booting Thunder Den…';
-  document.querySelector('#boot-message').textContent = 'A real Linux system with Bitcoin Core’s cryptography, right in your browser.';
+  document.querySelector('#boot-message').textContent = websiteDemo
+    ? "A real Linux system with Bitcoin Core's cryptography, right in your browser."
+    : 'A real Linux system with Bitcoin Core’s cryptography, right in your browser.';
   document.querySelector('#boot-estimate').hidden = false;
   bootProgress.hidden = false;
   bootControls.hidden = false;
@@ -139,6 +144,19 @@ function cameraOff() {
   cameraLed.dataset.active = 'false';
   cameraButton.textContent = 'Enable camera';
   cameraStatus.textContent = 'Camera off.';
+  if (websiteDemo) {
+    cameraPanel.hidden = true;
+    setCameraPreview(false);
+    document.querySelector('#camera-panel-title').textContent = 'Camera off';
+  }
+}
+
+function setCameraPreview(collapsed) {
+  cameraPanel.dataset.collapsed = String(collapsed);
+  document.querySelector('#camera-preview').hidden = collapsed;
+  const toggle = document.querySelector('#camera-close');
+  toggle.textContent = collapsed ? 'Show' : 'Hide preview';
+  toggle.setAttribute('aria-expanded', String(!collapsed));
 }
 
 function cameraError(error) {
@@ -231,6 +249,10 @@ async function enableCamera() {
   cameraAttempt = attempt;
   cameraButton.textContent = 'Cancel camera request';
   cameraPanel.hidden = false;
+  if (websiteDemo) {
+    setCameraPreview(false);
+    document.querySelector('#camera-panel-title').textContent = 'Camera preview';
+  }
   cameraStatus.textContent = 'Waiting for browser permission…';
   if (cameraUse) await waitForCamera();
   try {
@@ -247,6 +269,10 @@ async function enableCamera() {
     cameraVideo.hidden = false;
     cameraButton.textContent = 'Stop camera';
     cameraStatus.textContent = 'Camera on. Virtual camera: 320×240 at 10 fps. Images stay on your device.';
+    if (websiteDemo) {
+      document.querySelector('#camera-panel-title').textContent = 'Camera on';
+      cameraStatus.textContent = 'Images stay on your device.';
+    }
     cameraAttempt = undefined;
     if (cameraPause) await resumeCamera();
     watchCameraDelivery();
@@ -305,7 +331,7 @@ function fail(error) {
   updateKeyboardState();
   cameraOff();
   cameraButton.disabled = true;
-  status.textContent = `Stopped: ${error.message ?? error}. Open About for emulator diagnostics. Restart to try again.`;
+  status.textContent = `Stopped: ${error.message ?? error}. ${websiteDemo ? 'Choose View details for diagnostics.' : 'Open About for emulator diagnostics.'} Restart to try again.`;
   qmp?.flush(); // Preserve a final diagnostic even if the emulator omitted its newline.
   log.textContent += String(error.message ?? error) + '\n';
   restart.disabled = false;
@@ -336,7 +362,7 @@ async function refresh(module) {
     }
     context.putImageData(pixels, 0, 0);
     if (guestBooting) {
-      menuFrames = isNetworkMenu(frame) ? menuFrames + 1 : 0;
+      menuFrames = isNetworkMenu(frame, websiteDemo ? 400 : 480) ? menuFrames + 1 : 0;
       if (menuFrames >= 2) finishGuestBoot(true);
     }
     screen.dataset.frames = String(Number(screen.dataset.frames ?? 0) + 1);
@@ -357,7 +383,7 @@ async function start() {
     const [{ image, kernel }, wasm, [bios, { default: init }]] = await Promise.all([
       (async () => {
         stage('image', 'Connecting…');
-        const response = await fetchAsset('./assets/thunderden.img', {
+        const response = await fetchAsset(RELEASE.imagePath || './assets/thunderden.img', {
           signal: startupController.signal,
           onProgress: downloadProgress('image', 'Checking image…'),
         });
@@ -405,7 +431,7 @@ async function start() {
         '-append', 'console=tty1 quiet loglevel=3 acpi=off random.trust_cpu=off random.trust_bootloader=off',
         '-no-acpi',
         '-drive', 'file=/thunderden.img,format=raw,if=virtio,readonly=on',
-        '-vga', 'none', '-device', 'VGA,xres=640,yres=480',
+        '-vga', 'none', '-device', websiteDemo ? 'VGA,xres=640,yres=400' : 'VGA,xres=640,yres=480',
         // EHCI passed guest camera scanning in Wasm; xHCI timed out.
         '-device', 'virtio-rng-pci', '-device', 'usb-ehci,id=ehci',
         '-videodev', 'frame-file,id=cam0,path=/camera.yuyv,mode=browser,ready=/camera.ready',
@@ -493,19 +519,32 @@ screen.addEventListener('blur', releaseKeys);
 window.addEventListener('focus', updateKeyboardState);
 window.addEventListener('blur', releaseKeys);
 window.addEventListener('pagehide', cameraOff);
+if (websiteDemo) window.addEventListener('thunderden-demo-hidden', () => {
+  screen.blur();
+  releaseKeys();
+  if (cameraAttempt || stopCamera || cameraUse || cameraPause) cancelCamera().catch(fail);
+});
 document.addEventListener('pointerdown', event => {
   if (event.target !== screen && document.activeElement === screen) screen.blur();
 });
-restart.addEventListener('click', () => location.reload());
-document.querySelector('#retry').addEventListener('click', () => location.reload());
-document.querySelector('#about').addEventListener('click', () => aboutDialog.showModal());
+function restartDemo() {
+  if (websiteDemo) {
+    cameraOff();
+    releaseKeys();
+  }
+  location.reload();
+}
+restart.addEventListener('click', restartDemo);
+document.querySelector('#retry').addEventListener('click', restartDemo);
+document.querySelector('#about')?.addEventListener('click', () => aboutDialog.showModal());
 document.querySelector('#boot-diagnostics').addEventListener('click', () => {
   diagnostics.open = true;
   aboutDialog.showModal();
   diagnostics.scrollIntoView({ block: 'nearest' });
 });
 document.querySelector('#camera-close').addEventListener('click', () => {
-  cameraPanel.hidden = true;
+  if (websiteDemo) setCameraPreview(cameraPanel.dataset.collapsed !== 'true');
+  else cameraPanel.hidden = true;
 });
 
 start();

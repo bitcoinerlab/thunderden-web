@@ -5,8 +5,8 @@ import { isNetworkMenu } from '../web/boot-screen.js';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/network-menu.json', import.meta.url)));
 
-function frame(markers = fixture.markers, foreground = 255) {
-  const { width, height } = fixture;
+function frame(markers = fixture.markers, foreground = 255, height = fixture.height) {
+  const { width } = fixture;
   const rgb = new Uint8Array(width * height * 3).fill(25);
   for (const marker of markers) {
     const bits = Buffer.from(marker.bits, 'hex');
@@ -14,7 +14,8 @@ function frame(markers = fixture.markers, foreground = 255) {
     for (let bit = 0; bit < marker.width * marker.height; bit++) {
       if (!(bits[bit >> 3] & (0x80 >> (bit % 8)))) continue;
       const x = marker.x + bit % marker.width;
-      const y = marker.y + Math.floor(bit / marker.width);
+      const row = marker.y === fixture.height - 32 ? height - 32 : marker.y;
+      const y = row + Math.floor(bit / marker.width);
       rgb.fill(foreground, (y * width + x) * 3, (y * width + x) * 3 + 3);
     }
   }
@@ -24,6 +25,15 @@ function frame(markers = fixture.markers, foreground = 255) {
 test('recognize the actual public network-menu title and completed footer', () => {
   assert.equal(isNetworkMenu(frame()), true);
   assert.equal(isNetworkMenu(frame(fixture.markers, 85)), true);
+});
+
+test('the website profile recognizes the same real menu at 640x400 only when explicitly selected', () => {
+  const image = frame(fixture.markers, 255, 400);
+  assert.equal(isNetworkMenu(image), false);
+  assert.equal(isNetworkMenu(image, 400), true);
+  assert.equal(isNetworkMenu(frame([], 255, 400), 400), false);
+  for (const marker of fixture.markers) assert.equal(isNetworkMenu(frame([marker], 255, 400), 400), false);
+  assert.equal(isNetworkMenu(frame(fixture.markers, 255, 432), 432), false);
 });
 
 test('a blank screen or partially painted menu does not mean the guest is ready', () => {

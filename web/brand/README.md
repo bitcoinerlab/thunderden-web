@@ -8,3 +8,10 @@ served locally, without a runtime dependency on GitHub.
 
 The USB marking in `laptop.svg` uses the exact icon path from that same official
 asset, without the wordmark. Only its placement and surface perspective change.
+
+`thunderden-horizontal-graphite.svg` and `favicon.svg` are also copied unchanged
+from the same revision, for the light website header and browser tab.
+
+The small phone/laptop illustration in `site/companion-devices.svg` uses the same
+unchanged den-mark path on its laptop screen. It is an explanatory drawing, not a
+replacement for the guest display or an additional QR code.

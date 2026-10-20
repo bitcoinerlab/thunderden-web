@@ -13,6 +13,7 @@ const types = {
   '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.wasm': 'application/wasm',
+  '.woff2': 'font/woff2',
 };
 
 export function createDemoServer() {
@@ -27,7 +28,7 @@ export function createDemoServer() {
     }
     try {
       const url = new URL(request.url, 'http://localhost');
-      const pathname = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
+      const pathname = decodeURIComponent(url.pathname.endsWith('/') ? url.pathname + 'index.html' : url.pathname);
       const candidate = resolve(root, '.' + pathname);
       if (!candidate.startsWith(root)) {
         response.writeHead(403).end('Forbidden');

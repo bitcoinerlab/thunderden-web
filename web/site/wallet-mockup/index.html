@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../../">
+  <title>Demo wallet - Thunder Den</title>
+  <link rel="icon" href="./brand/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./site/site.css">
+  <script src="./vendor/qrcode-generator.js" defer></script>
+  <script type="module" src="./site/wallet-mockup/wallet.js"></script>
+</head>
+<body class="wallet-page">
+<main class="wallet-shell">
+  <header><a class="site-brand" href="./site/" aria-label="Thunder Den home"><img src="./brand/thunderden-horizontal-graphite.svg" width="160" height="35" alt="Thunder Den"></a><span class="demo-badge">DEMO WALLET</span></header>
+  <section id="seed-step" aria-labelledby="seed-title">
+    <p class="eyebrow">1 / 3 &middot; PAPER BACKUP</p>
+    <h1 id="seed-title" tabindex="-1">Scan a seed QR</h1>
+    <p>In Thunder Den, select <strong>1: Bitcoin mainnet</strong>, then <strong>Scan a seed QR</strong>. Leave the passphrase blank.</p>
+    <div class="paper-backup">
+      <div class="paper-sheet">
+      <div id="seed-qr" class="qr-code"></div>
+      </div>
+    </div>
+    <button id="seed-next" class="primary-link" type="button">I've scanned the seed QR</button>
+    <p class="step-note">This QR gives Thunder Den the demo wallet's recovery words.</p>
+    <details id="seed-words"><summary>Show recovery words</summary><p class="step-note">The QR above contains the recovery words below.</p><div id="demo-words" class="demo-words"></div></details>
+  </section>
+  <section id="payment-step" aria-labelledby="payment-title" hidden>
+    <p class="eyebrow">2 / 3 &middot; DEMO PAYMENT</p>
+    <h1 id="payment-title" tabindex="-1">Sign a demo payment</h1>
+    <dl class="payment-summary"><div><dt>Amount</dt><dd id="payment-amount"></dd></div><div><dt>Fee</dt><dd id="payment-fee"></dd></div><div class="payment-address"><dt>To</dt><dd id="payment-address"></dd></div></dl>
+    <p class="payment-instructions">In Thunder Den, <strong>Scan a QR code</strong>, then review and type <strong>SIGN</strong>.</p>
+    <div id="payment-qr" class="qr-code payment-qr"></div>
+    <button id="scan-next" class="primary-link" type="button">Scan the signed reply</button>
+    <button class="text-button" type="button" data-back="seed">Back</button>
+  </section>
+  <section id="scan-step" aria-labelledby="scan-title" hidden>
+    <p class="eyebrow">3 / 3 &middot; CHECK SIGNATURE</p>
+    <h1 id="scan-title" tabindex="-1">Scan Thunder Den's reply</h1>
+    <p>Point your phone at the signed QR on Thunder Den.</p>
+    <video id="reply-video" autoplay muted playsinline aria-label="Scan the signed QR from Thunder Den"></video>
+    <progress id="reply-progress" max="1" value="0" aria-label="Signed reply scan progress"></progress>
+    <p id="scan-status" class="step-note" role="status">Opening camera...</p>
+    <button id="scan-retry" class="primary-link" type="button" hidden>Try again</button>
+    <button class="text-button" type="button" data-back="payment">Back</button>
+  </section>
+  <section id="done-step" aria-labelledby="done-title" hidden>
+    <p class="eyebrow">DONE</p>
+    <h1 id="done-title" tabindex="-1">Signature verified</h1>
+    <p>Next, explore how Thunder Den gathers entropy (randomness) to create recovery words. Bitcoin Core's randomness is always included. You can also mix in camera noise and either dice rolls or coin flips.</p>
+    <p>On the virtual laptop:</p>
+    <ol><li>Press Esc to return to the menu.</li><li>Select <strong>End session (clear keys)</strong>.</li><li>Start a new session and select <strong>Create a new wallet</strong>.</li></ol>
+    <button class="text-button" type="button" data-back="seed">Restart guide</button>
+  </section>
+  <noscript><p>Enable JavaScript to use the demo wallet.</p></noscript>
+</main>
+</body>
+</html>

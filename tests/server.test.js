@@ -42,6 +42,15 @@ test('serve the page with shared-memory headers but not files outside web/', asy
     assert.equal(escaped.status, 403);
     const missing = await fetch(base + '/missing');
     assert.equal(missing.status, 404);
+    for (const path of ['/site/', '/site/wallet-mockup/']) {
+      const nested = await fetch(base + path);
+      assert.equal(nested.status, 200, path);
+      assert.equal(nested.headers.get('cross-origin-opener-policy'), 'same-origin');
+      assert.match(await nested.text(), /Thunder Den/);
+    }
+    const font = await fetch(base + '/fonts/InterVariable.woff2');
+    assert.equal(font.headers.get('content-type'), 'font/woff2');
+    assert.equal(new TextDecoder().decode((await font.arrayBuffer()).slice(0, 4)), 'wOF2');
   } finally {
     server.close();
     server.closeAllConnections();

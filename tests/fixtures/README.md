@@ -1,5 +1,12 @@
 # Public animated PSBT fixture
 
+The phone walkthrough has its own smaller fixture in
+`web/site/wallet-mockup/fixture.js`, reproduced by `npm run fixture:wallet`.
+It uses the same public words with mainnet BIP84 account zero, one synthetic
+100,000-sat funding output, a 20,000-sat payment, 79,000-sat change and a 1,000-sat
+fee. The funding transaction has no live coins. The original multi-input fixture
+below is preserved separately.
+
 `animated-psbt.json` contains a 1,250-byte, seven-part `ur:crypto-psbt` stream.
 Its fourteen frames include original fragments and fountain frames, replayed at
 10 fps by the browser test. The unsigned PSBT's SHA-256 is recorded in the file.

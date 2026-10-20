@@ -8,13 +8,16 @@ test data.
 ## Unit tests
 
 ```sh
+npm ci
 npm test
 ```
 
-These use Node.js's built-in test runner, with no npm dependencies. They cover
+These use Node.js's built-in test runner. Wallet fixture tests also use the pinned
+development dependencies in `package-lock.json`. They cover
 camera conversion and complete-frame publication, display parsing, keyboard
 mapping, QEMU monitor commands, HTTP serving, download progress, image verification,
-kernel extraction and ready-screen recognition. They do not boot Thunder Den.
+kernel extraction, ready-screen recognition and verification of signed QR replies.
+They do not boot Thunder Den.
 
 ## Browser tests
 
@@ -31,6 +34,10 @@ packages in a virtual environment. Playwright can install its own Chromium with
 | Check | Additional tools | What it covers |
 | --- | --- | --- |
 | `browser-layout.py` | None | Loading UI, screen fit and illustration layout across viewport sizes |
+| `browser-site.py` | None | Compact laptop/tablet layouts, natural page flow, balanced power/expand controls, expanded-view focus/exit, product-only narrow layouts without emulator downloads and resize transitions; use `/site/` |
+| `browser-site-boot.py` | `ffmpeg`, `tesseract` | Real 640x400 boot, public SeedQR import, expanded-view keyboard isolation, preserved camera capture, collapsible controls and immediate restart; synthetic video |
+| `browser-wallet-ui.py` | None | Seven phone viewports, no-scroll seed/payment QR and button fit, full inline address, collapsed recovery words, camera cancellation and no wallet persistence |
+| `browser-wallet.py` | `tesseract` | Compact phone-size QR import, real guest signing and phone verification of the actual guest QR reply; synthetic MediaStreams |
 | `browser-startup.py` | None | Compressed downloads, progress, caching, boot cover and error handling |
 | `browser-boot.py` | `tesseract` | Actual guest boot, menu navigation and keyboard focus/release |
 | `browser-camera.py` | `ffmpeg`, `qrencode`, `tesseract` | Static QR/address verification, permissions and camera lifecycle |
@@ -46,6 +53,9 @@ For example, run the non-camera checks with:
 python3 tests/browser-layout.py test-results/layout
 python3 tests/browser-startup.py test-results/startup
 python3 tests/browser-boot.py test-results/boot
+python3 tests/browser-site.py test-results/site
+python3 tests/browser-wallet-ui.py test-results/wallet-ui
+python3 tests/browser-site-boot.py test-results/site-boot
 ```
 
 Run camera checks separately so only one emulator is active at a time:
@@ -53,6 +63,8 @@ Run camera checks separately so only one emulator is active at a time:
 ```sh
 python3 tests/browser-camera.py test-results/camera
 python3 tests/browser-animated-psbt.py test-results/animated-psbt
+python3 tests/browser-wallet.py test-results/wallet
+python3 tests/browser-wallet.py test-results/wallet-animation --expanded --check-animation
 python3 tests/browser-camera-latency.py test-results/camera-latency --seconds 120
 python3 tests/browser-camera-entropy.py test-results/camera-collection
 # For a separately prepared, unchanged SeedQR-enabled release bundle:
@@ -60,11 +72,32 @@ python3 tests/browser-camera-access.py test-results/camera-access --url http://1
 python3 tests/browser-camera-usb.py test-results/camera-usb --url http://127.0.0.1:4173/assets/seedqr-demo/index.html
 ```
 
-The camera scripts use Chromium's synthetic webcam through the real
-`getUserMedia()` API, not a physical camera. Address and transaction checks use
+Most camera scripts use Chromium's synthetic webcam through the real
+`getUserMedia()` API, not a physical camera. The phone round-trip test instead
+supplies canvas-generated MediaStreams and feeds original guest pixels into the
+phone scanner. Its production QR decoder and signature verifier remain unchanged.
+`--expanded` runs this walkthrough with the enlarged display. `--check-animation`
+captures eight seconds of actual canvas updates, saves each frame and checks that
+the QR rectangle stays complete, the background/captions stay steady and every
+sample decodes. This samples the browser rendering path; it does not establish
+vblank synchronization or tear-free behavior on all hardware.
+Address and transaction checks use
 the public BIP39 `abandon`/`about` fixture and synthetic coins. The animated
 transaction test checks the expected payment, change and fee, then cancels.
 See [fixture documentation](../tests/fixtures/README.md) for its source and scope.
+
+The phone companion at `/site/wallet-mockup/` uses the fixed public
+`abandon`/`about` vector with Bitcoin mainnet BIP84 paths and a synthetic funding
+transaction. It has no account, network lookup or broadcast path. The payment is
+20,000 sats with a 1,000-sat fee and 79,000 sats in change. Signature verification
+compares the complete unsigned transaction and uses pinned previous outputs,
+values and key paths rather than trusting response metadata. It accepts only the
+expected public key and SIGHASH_ALL ECDSA signature. Camera access starts on an
+explicit button action and stops after completion, cancellation or hiding the page.
+
+`npm run build:wallet` rebuilds the checked-in browser bundle and its third-party
+license notices. `npm run fixture:wallet` reproduces the fixed demo fixture.
+Neither command changes the guest image or emulator.
 
 The collection test checks delivery and cancellation, not entropy quality or
 successful statistical assessment. Add `--wait-assessment` to wait for the
@@ -90,7 +123,9 @@ before requesting another, avoiding a queue of stale screenshots. Terminal
 failures preserve the first error, reject pending commands and discard queued
 input; guest keystrokes are not retried or replayed.
 
-The guest display is 640×480. The browser camera backend takes complete 320×240
+The original demo's guest display is 640x480. The website profile at `/site/`
+requests 640x400 and uses the same menu markers at explicitly selected rows.
+The browser camera backend takes complete 320×240
 YUYV frames at a target of 10 fps and presents them through a USB 2 EHCI controller.
 EHCI is the tested browser configuration; xHCI guest scanning remains unresolved.
 Target frame rates do not guarantee guest throughput or camera-frame freshness.
@@ -130,6 +165,25 @@ capture. The illustrated webcam LED shows active browser capture, not guest use
 or QR-decoding success. Permission, missing-device and busy/system errors are
 best-effort browser classifications, not precise hardware diagnoses.
 
+On the website, resizing into the product-only narrow layout releases keyboard
+input and cancels capture through the same camera-cancellation path. Returning to
+a wider layout preserves the running guest and never requests camera access again
+without an explicit action.
+
+The website preview collapses to a camera-on indicator with Show and Stop camera
+controls. Collapsing does not stop capture or hide the stop action; expanding
+reuses the same stream. The laptop power control stops capture before reloading
+the page, without confirmation, and boots a new guest. The original standalone
+demo retains its toolbar and preview-hiding behavior.
+
+The website's expanded mode is an in-page overlay, not the Fullscreen API. It
+keeps the original 640x400 canvas and running guest, with Esc forwarded normally.
+Back to website or F8 exits; the F8 key is intercepted before guest input. Focus
+transitions release held guest keys, background controls become inert and page
+position/focus are restored on return. Camera controls remain reachable without
+re-requesting capture. Entering a narrow layout exits and uses normal camera
+cancellation. No keyboard-lock permission is requested.
+
 The emulator's Docker builder includes the Emscripten
 [#26582](https://github.com/emscripten-core/emscripten/pull/26582) synchronous-proxy
 lifetime correction. Rebuild both the builder and emulator, then rerun
@@ -163,7 +217,7 @@ console=tty1 quiet loglevel=3 acpi=off random.trust_cpu=off random.trust_bootloa
 
 The page covers quiet startup until the pinned release's public network-menu
 title and completed footer appear in two consecutive emulator frames. Recognition
-depends on the 640×480 VGA8x16 layout. It only reveals the original screen; it does
+depends on the selected 640x480 or 640x400 VGA8x16 profile. It only reveals the original screen; it does
 not render a replacement guest interface. **Show boot details** and manual control
 remain available if recognition fails. The boot bar is explicitly estimated:
 it follows elapsed time for the usual ten-second startup, then quietly becomes an

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../">
+  <title>Thunder Den - A Bitcoin signer</title>
+  <meta name="description" content="Turn an old laptop into a Bitcoin signer. Explore the real Thunder Den software in your browser with public demo data.">
+  <link rel="icon" href="./brand/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="./fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./site/site.css">
+  <script src="./vendor/qrcode-generator.js" defer></script>
+  <script type="module" src="./site/site.js"></script>
+</head>
+<body class="website" data-demo="website">
+<a class="skip-link" href="./site/#details">Skip to the details</a>
+<main>
+  <section class="first-screen" aria-labelledby="intro-title">
+    <header class="site-header">
+      <a class="site-brand" href="./site/" aria-label="Thunder Den home"><img src="./brand/thunderden-horizontal-graphite.svg" width="192" height="42" alt="Thunder Den"></a>
+      <nav aria-label="Main navigation"><a href="./site/#details">How it works</a><a href="./site/#get-started">Use a real laptop</a><a href="https://github.com/bitcoinerlab/thunderden" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">&#8599;</span></a></nav>
+    </header>
+    <div class="site-intro">
+      <h1 id="intro-title">Turn an old laptop into a Bitcoin signer.</h1>
+      <p>Boot from USB without using the laptop's hard drive, Wi-Fi or Bluetooth.<br>Review and sign transactions from your wallet app using QR codes.</p>
+    </div>
+    <section id="phone-demo" class="phone-demo-message" aria-labelledby="phone-demo-title">
+      <h2 id="phone-demo-title">Try it before preparing a USB drive</h2>
+      <p>Open thunderden.com on a computer to try the live browser demo. No USB drive needed.</p>
+    </section>
+    <section class="demo-experience" aria-labelledby="demo-title">
+      <header class="demo-heading"><h2 id="demo-title"><span>Try Thunder Den in your browser</span></h2><p>The real USB image, running locally on a virtual computer.</p></header>
+    <div class="demo-stage">
+      <aside class="companion-card" aria-labelledby="companion-title">
+        <h2 id="companion-title">Use your phone as a demo wallet</h2>
+        <figure class="companion-illustration"><img src="./site/companion-devices.svg" width="200" height="64" alt="A phone facing a laptop, used together for the demo."><figcaption><span>Demo wallet</span><span>Thunder Den</span></figcaption></figure>
+        <p>Scan this QR <strong>with your phone</strong> to open a fake wallet web page. Use it with the virtual laptop to try Thunder Den.</p>
+        <div id="companion-qr" class="qr-code"></div>
+        <div class="companion-address"><p>Or type this on your phone:</p><a id="companion-link" class="companion-link" href="./site/wallet-mockup/" target="_blank" rel="noreferrer">/site/wallet-mockup/</a></div>
+        <p class="card-note">No app to install.</p>
+      </aside>
+      <section class="scene" aria-label="Live Thunder Den browser demo">
+        <div class="demo-expand-controls"><button id="expand-demo" type="button" aria-controls="screen-wrapper" aria-expanded="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg>Expand demo</button></div>
+        <div class="expanded-controls" hidden><button id="demo-exit" type="button" title="Back to website (F8)" aria-keyshortcuts="F8">Back to website <kbd>F8</kbd></button></div>
+        <div id="device">
+          <img class="laptop-art" src="./laptop.svg" alt="" aria-hidden="true">
+          <img class="device-brand lid-brand" src="./brand/thunderden-horizontal-paper.svg" alt="" aria-hidden="true">
+          <img class="device-brand deck-brand" src="./brand/thunderden-horizontal-paper.svg" alt="" aria-hidden="true">
+          <span id="camera-led" data-active="false" aria-hidden="true"></span>
+          <section id="screen-wrapper" aria-label="Virtual laptop display">
+            <canvas id="screen" width="640" height="400" tabindex="0" inert data-ready="false" data-keyboard="released" aria-label="Thunder Den virtual computer screen" aria-describedby="keyboard-instructions"></canvas>
+            <section id="boot-cover" aria-labelledby="boot-title">
+              <div class="boot-card">
+                <h2 id="boot-title" role="status">Loading Thunder Den...</h2>
+                <p id="boot-message">A real Linux system with Bitcoin Core's cryptography, right in your browser.</p>
+                <div id="startup"><ol>
+                  <li id="startup-image"><label for="image-progress">Thunder Den image<span class="asset-size"> &middot; 64 MiB</span></label><div class="asset-progress"><progress id="image-progress" max="1" value="0"></progress><small></small></div></li>
+                  <li id="startup-wasm"><label for="wasm-progress">Browser x86-64 emulator<span class="asset-size"></span></label><div class="asset-progress"><progress id="wasm-progress" max="1" value="0"></progress><small>Connecting...</small></div></li>
+                </ol></div>
+                <div id="boot-progress" hidden><progress id="boot-progress-bar" max="1" value="0" aria-label="Estimated startup progress"></progress></div>
+                <p id="boot-estimate" hidden><span>Usually around 10 seconds.</span> <span>Slower devices may take longer.</span></p>
+                <p id="boot-error" hidden></p>
+                <button id="retry" type="button" hidden>Restart demo</button>
+                <button id="boot-diagnostics" type="button" hidden>View details</button>
+              </div>
+            </section>
+            <button id="keyboard-prompt" type="button" hidden aria-controls="screen" aria-label="Click the screen to capture keyboard input" aria-describedby="keyboard-shortcuts"><span id="keyboard-guide"><span class="keyboard-ready">Thunder Den is ready</span><span id="keyboard-instructions"><strong>Click the screen</strong> to capture keyboard input.<br><strong>Click outside</strong> to release it.</span><span id="keyboard-shortcuts" class="guide-keys"><kbd>&uarr; &darr;</kbd> navigate &middot; <kbd>Enter</kbd> select &middot; <kbd>Esc</kbd> back</span></span></button>
+            <section id="camera-request" hidden role="dialog" aria-labelledby="camera-request-title" aria-describedby="camera-request-message"><div class="camera-card"><h2 id="camera-request-title">Camera access is needed</h2><p id="camera-request-message">The virtual device needs your camera.</p><p class="camera-local">Images stay on your device.</p><p id="camera-fallback" hidden>You can still enter public test recovery words and view public keys.</p><p id="camera-request-waiting" hidden role="status">Waiting for browser permission...</p><div class="camera-actions"><button id="camera-enable" type="button">Enable camera</button><button id="camera-cancel" type="button">Cancel</button></div></div></section>
+            <div id="boot-controls" hidden><button id="boot-details" type="button" disabled aria-controls="screen" aria-expanded="false">Show boot details</button></div>
+          </section>
+          <!-- Cover the decorative power mark without changing the shared laptop artwork. -->
+          <svg class="power-recess-cover" viewBox="0 0 1120 830" aria-hidden="true"><defs><linearGradient id="power-deck" x1="560" y1="615" x2="560" y2="805" gradientUnits="userSpaceOnUse"><stop stop-color="#32353a"/><stop offset=".45" stop-color="#25282d"/><stop offset="1" stop-color="#191b20"/></linearGradient></defs><rect x="960" y="623" width="20" height="10" fill="url(#power-deck)"/></svg>
+          <button id="restart" class="laptop-power" type="button" disabled aria-label="Restart demo" aria-describedby="power-label"><svg viewBox="0 0 48 32" aria-hidden="true"><g transform="translate(24 16) matrix(1 0 .2 .55 0 0)"><circle r="19"/><path d="M-5-6a8 8 0 1 0 10 0M0-11v10"/></g></svg><span id="power-label" role="tooltip">Restart demo</span></button>
+        </div>
+        <p class="demo-note">QR scanning and display are significantly better on a real laptop.</p>
+      </section>
+    </div>
+    </section>
+  </section>
+  <section id="details" class="site-details" aria-labelledby="details-title">
+    <div class="details-heading">
+      <p class="eyebrow">WHY THUNDER DEN</p>
+      <h2 id="details-title">Your hardware. Software you can inspect.</h2>
+      <p>Thunder Den is an offline Bitcoin signer: a device that uses your secret keys to approve payments without going online. Keeping your keys off your everyday phone or computer reduces their exposure to malware and online theft.</p>
+      <p>A hardware wallet is one way to keep signing separate. Thunder Den takes a different approach: bring your own laptop and start it from a USB drive instead of its usual operating system. The USB holds only software. Recovery words and keys stay in the laptop's memory for the session. Your wallet app stays online and exchanges data with Thunder Den only through QR codes. There is no cable or wireless connection between the devices.</p>
+    </div>
+    <div class="details-grid">
+      <article>
+        <span class="section-number">01</span><h3>Bring your own laptop</h3>
+        <p>Use a laptop you already own, ideally one made years before Thunder Den existed. There is no Thunder Den hardware shipment to intercept or modify in a <a href="https://thehackernews.com/2026/10/ledger-finds-unauthorized-hardware.html" target="_blank" rel="noreferrer">supply-chain attack</a>.</p>
+      </article>
+      <article>
+        <span class="section-number">02</span><h3>Review the code with AI. Build it yourself.</h3>
+        <p><a href="https://github.com/bitcoinerlab/thunderden/blob/master/docs/DESIGN.md#build-and-independent-review" target="_blank" rel="noreferrer">AI auditability</a> is a design principle. Thunder Den keeps its own code and build process small and readable so you can ask your AI assistant to check its claims against the implementation.</p>
+        <p>Inspect the source, run the tests and <a href="https://github.com/bitcoinerlab/thunderden/blob/master/docs/BUILD.md" target="_blank" rel="noreferrer">build your own USB image</a> from pinned sources.</p>
+      </article>
+      <article>
+        <span class="section-number">03</span><h3>A big screen. A real keyboard.</h3>
+        <p>A laptop's large screen and full keyboard make reviewing transactions and entering recovery words more comfortable than on a typical hardware wallet.</p>
+      </article>
+      <article>
+        <span class="section-number">04</span><h3>Your wallet app. Your spending rules.</h3>
+        <p>Use <a href="https://github.com/bitcoinerlab/thunderden/blob/master/docs/SPARROW.md" target="_blank" rel="noreferrer">Sparrow</a> or <a href="https://github.com/bitcoinerlab/thunderden/blob/master/docs/LIANA.md" target="_blank" rel="noreferrer">Liana</a>. Many other wallets with QR-based air-gapped signing are also supported.</p>
+        <p>Thunder Den understands descriptor-based wallets. It supports multisig and Miniscript policies, including rules for time-delayed recovery.</p>
+      </article>
+      <article>
+        <span class="section-number">05</span><h3>A fresh session, every time</h3>
+        <p>Wallet data stays in memory, never on the laptop's drive or USB. Enter or scan your recovery words each session. The USB can be reused or recreated; keep your recovery-word backup safe.</p>
+      </article>
+      <article>
+        <span class="section-number">06</span><h3>Take security further</h3>
+        <ul>
+          <li><strong>Secure Boot.</strong> Set up Secure Boot so your laptop <strong>can only boot</strong> from signed Thunder Den USB images. Then protect BIOS access with a password. <a href="https://github.com/bitcoinerlab/thunderden/blob/master/docs/SECURE_BOOT.md" target="_blank" rel="noreferrer">Follow the setup guide &#8599;</a></li>
+          <li><strong>Remove unused hardware.</strong> Take out the HDD/SSD and Wi-Fi/Bluetooth card on suitable laptops. Old laptops can make this straightforward. <a href="https://x.com/landabaso/status/2112233948122378696?s=20" target="_blank" rel="noreferrer">See a laptop example &#8599;</a></li>
+        </ul>
+      </article>
+    </div>
+    <section id="get-started" class="get-started" aria-labelledby="get-started-title"><div><p class="eyebrow">TAKE IT OFFLINE</p><h2 id="get-started-title">Give an old laptop a new job.</h2><p>Use an x86-64 laptop with an Intel or AMD processor. Download the image, verify its checksum and write it to a USB drive. Start the laptop from USB.</p></div><a class="primary-link" href="https://github.com/bitcoinerlab/thunderden#download-and-boot" target="_blank" rel="noreferrer">Get Thunder Den and the USB guide &#8599;</a></section>
+  </section>
+</main>
+<footer class="site-footer"><span>Part of the <a href="https://github.com/bitcoinerlab" target="_blank" rel="noreferrer">BitcoinerLAB</a> family of open-source Bitcoin tools.</span><a href="https://github.com/bitcoinerlab/thunderden" target="_blank" rel="noreferrer">Explore the code on GitHub &#8599;</a></footer>
+<p id="status" class="sr-only" role="status">Loading Thunder Den...</p>
+<p id="keyboard-status" class="sr-only" role="status">Keyboard available after startup</p>
+<aside id="camera-panel" hidden data-collapsed="false" aria-label="Local camera preview"><div class="panel-heading"><h2><span class="camera-indicator" aria-hidden="true"></span><span id="camera-panel-title">Camera preview</span></h2><div class="preview-actions"><button id="camera-close" class="close-panel" type="button" aria-controls="camera-preview" aria-expanded="true">Hide preview</button><button id="camera" class="close-panel" type="button" disabled>Enable camera</button></div></div><div id="camera-preview"><video id="camera-video" autoplay muted playsinline hidden aria-label="Local camera preview"></video><p id="camera-status" role="status">Camera off.</p></div></aside>
+<dialog id="about-dialog" aria-labelledby="about-title"><form method="dialog"><button class="close-panel" aria-label="Close diagnostics">Close</button></form><h2 id="about-title">Demo diagnostics</h2><details id="diagnostics"><summary>Emulator diagnostics</summary><pre id="log"></pre></details></dialog>
+<noscript><p class="noscript-note">JavaScript is needed for the simulator and QR codes. The information below is still available.</p></noscript>
+</body>
+</html>
