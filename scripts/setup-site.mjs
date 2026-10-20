@@ -4,10 +4,16 @@ import { readBootKernel } from '../web/disk.js';
 import { RELEASE } from '../web/site/release.js';
 
 try {
-  if (!process.argv[2]) throw new Error('Usage: npm run setup:site -- /path/to/the/pinned/thunderden.img');
-  const image = await readFile(process.argv[2]);
+  let image;
+  if (process.argv[2]) image = await readFile(process.argv[2]);
+  else {
+    console.log(`Downloading the unchanged ${RELEASE.tag} website image...`);
+    const response = await fetch(RELEASE.url, { signal: AbortSignal.timeout(120000) });
+    if (!response.ok) throw new Error(`Image download returned HTTP ${response.status}`);
+    image = Buffer.from(await response.arrayBuffer());
+  }
   if (createHash('sha256').update(image).digest('hex') !== RELEASE.sha256) {
-    throw new Error('Image checksum does not match the pinned local website demo build.');
+    throw new Error('Image checksum does not match the pinned website release.');
   }
   if (image.length !== RELEASE.bytes || image.findLastIndex(byte => byte !== 0) + 1 !== RELEASE.contentBytes) {
     throw new Error('Image size does not match the pinned loading metadata.');

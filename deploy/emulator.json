@@ -1,0 +1,33 @@
+{
+  "sourceCommit": "3b81a4a6c556ccbfc88a6c028e1af5d9b72a1cb4",
+  "files": {
+    "bios-256k.bin": {
+      "bytes": 262144,
+      "sha256": "f1d4f396011197eb989029659cde250751cc711c336b8fbbe6f77cfe0dc5dcd8"
+    },
+    "kvmvapic.bin": {
+      "bytes": 9216,
+      "sha256": "cdf057a71b07e3b52b19cbe210bdefa59250d01a9810b960f7fe1f98eed95a27"
+    },
+    "linuxboot_dma.bin": {
+      "bytes": 1536,
+      "sha256": "9c49e255340c78fc12e54ed043462bca02fb7fca29b7cfab62ff88a5344b6950"
+    },
+    "qemu-system-x86_64.js": {
+      "bytes": 218508,
+      "sha256": "55503bb3fbb58170e8c61f9a6557aa47578ee9d1469c7b11960922167e7cdc30"
+    },
+    "qemu-system-x86_64.wasm": {
+      "bytes": 11857521,
+      "sha256": "33b3b350d7f90267be7e8180c697f8e15a8f8046c698570cbf5e1fb1aa8ec6aa"
+    },
+    "qemu-system-x86_64.worker.js": {
+      "bytes": 6000,
+      "sha256": "8efab02a9cb5ee63ced22e9853bce74cbb895d15a5fb3d5139fef855c50f62ea"
+    },
+    "vgabios-stdvga.bin": {
+      "bytes": 39424,
+      "sha256": "651513519f9e0d5b99d3b051a8f5c68db69e987339b59a441d371068c34c146b"
+    }
+  }
+}

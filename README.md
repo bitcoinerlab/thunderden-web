@@ -115,7 +115,7 @@ to learn about the actual USB signer, its design and its own validation status.
 
 The in-progress website preview is at **http://127.0.0.1:4173/site/**, with the
 original demo still at `/`. See [the website notes](docs/WEBSITE.md) to prepare its
-separately pinned local image and review the companion's current scope.
+separately pinned release image and review the companion's current scope.
 
 Install the pinned development dependencies to run all JavaScript unit tests:
 
@@ -129,10 +129,11 @@ After changing its vendor entry point, run `npm run build:wallet`. To reproduce
 its public mainnet-format fixture, run `npm run fixture:wallet`.
 
 See the [development guide](docs/DEVELOPMENT.md) for browser test commands,
-integration details and static-host requirements. Hosting needs HTTPS, the
-shared-memory headers used by the emulator, and HTTP compression for the large
-downloads. The included Node server is for local development, not a production
-hosting service.
+integration details and static-host requirements. The
+[Cloudflare guide](docs/CLOUDFLARE.md) covers building and deploying an HTTPS preview.
+Hosting needs HTTPS, the shared-memory headers used by the emulator and HTTP
+compression for the large downloads. The included Node server is for local
+development, not a production hosting service.
 
 Reports and contributions are welcome, especially reproducible browser or camera
 issues. Use only public fixtures and remove private information from logs and

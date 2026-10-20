@@ -217,28 +217,31 @@ the BitcoinerLAB family of open-source Bitcoin tools, linking the organization.
   to coordinate the phone and laptop.
 - Serve over HTTPS with the shared-memory headers required by the emulator.
   Include ordinary HTTP compression and validate decoded sizes and checksums.
-- Defer Cloudflare decisions until later. The image's compressed representation
-  is already below 25 MiB. Local development does not require Cloudflare services,
-  account changes or billing activation.
+- The [Cloudflare preview](CLOUDFLARE.md) packages precompressed images below the
+  25 MiB upload limit. A small Worker supplies ordinary HTTP content encoding.
+  Local development still works independently with `npm start`.
 
 ## Local preview
 
 The original demo at `/` and the existing labelled bundles remain available.
-The website profile uses a separate verified copy of the pinned local development
+The website profile uses a separate verified copy of the published Preview 11
 image, without changing the Preview 8 pin or guest bytes:
 
 ```sh
-npm run setup:site -- /path/to/the/pinned/thunderden.img
+npm run setup:site
 npm start
 ```
 
-The current development profile is `development-b438a52-dirty-8a1b6ecbe1`, with
-image SHA-256 `e9c9e622ae3c129d85c636b8c2421e432130e78c063caadf61126931fb317242`.
-It includes the guest's offscreen QR rendering and steady captions. Browser
-checks covered actual signing and eight seconds of animated replies: all 154
-sampled frames decoded, without blank/white redraw stages or caption changes.
-This is not a published release or a guarantee of tear-free rendering on every
-framebuffer, browser or device. Physical two-device acceptance remains separate.
+The website is pinned to the unsigned image from
+[`v0.0.1-preview.11`](https://github.com/bitcoinerlab/thunderden/releases/tag/v0.0.1-preview.11),
+with SHA-256 `e9c9e622ae3c129d85c636b8c2421e432130e78c063caadf61126931fb317242`.
+Its bytes match the previously tested development image. It includes offscreen QR
+rendering and steady captions. Browser checks covered actual signing and eight
+seconds of animated replies: all 154 sampled frames decoded, without blank/white
+redraw stages or caption changes. This does not guarantee tear-free rendering on
+every framebuffer, browser or device. Physical two-device acceptance remains
+separate. `setup:site` downloads the pinned release or accepts a matching local
+image path as its optional argument.
 
 Open `http://127.0.0.1:4173/site/`. The compatible emulator files must already be
 installed as described in the development guide. Fonts and QR generation are
@@ -252,7 +255,7 @@ The entry QR follows the page's origin. A localhost address is not reachable fro
 a separate phone. This is a development constraint, not visitor-facing copy. Arrange
 a phone-reachable preview address before testing across devices. Phone camera
 scanning will also require HTTPS. The development server remains loopback-only;
-this work does not open network access or publish a preview.
+use the separate Cloudflare preview workflow for physical two-device checks.
 
 The companion uses locally bundled QR decoding, UR reconstruction and signature
 verification. It requests the phone camera only after an explicit action and
@@ -286,4 +289,6 @@ Automated viewport checks and synthetic camera tests do not complete this list.
 3. Test the guest's optional wallet-creation path; do not claim it is validated by
    the signing walkthrough.
 4. Pin production artifacts and verify HTTPS hosting, compression, caching and
-   shared-memory headers before launch. No DNS changes or publication yet.
+   shared-memory headers before launch. The Cloudflare workflow initially deploys
+   the separately pinned website release for HTTPS testing, with search indexing
+   disabled.

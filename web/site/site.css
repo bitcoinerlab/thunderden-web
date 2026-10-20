@@ -29,7 +29,7 @@ body.website, body.wallet-page {
 .site-intro { text-align: center; padding: 6px 0 0; }
 .site-intro h1 { margin: 0 0 9px; font-size: clamp(26px,2.45vw,35px); line-height: 1.2; font-weight: 600; letter-spacing: -.035em; }
 .site-intro > p { max-width: 900px; margin: 0 auto; color: #686b63; font-size: 14px; line-height: 1.65; }
-.demo-experience { margin-top: 8px; }
+.demo-experience { margin-top: 12px; }
 .demo-heading { margin-bottom: 20px; text-align: center; }
 .demo-heading h2 { display: flex; align-items: center; gap: 20px; margin: 0 0 6px; font-size: 12px; line-height: 1.5; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
 .demo-heading h2::before, .demo-heading h2::after { content: ''; flex: 1; border-top: 1px solid #dedfd8; }
