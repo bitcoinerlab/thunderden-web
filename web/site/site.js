@@ -27,7 +27,10 @@ screen.addEventListener('pointerdown', event => {
   // user is trying to select a guest menu with the mouse.
   if (event.button !== 0 || !event.isPrimary || screen.inert || screen.dataset.ready !== 'true'
     || screen.dataset.keyboard !== 'active' || !document.hasFocus()) return;
-  clearTimeout(reminderTimer);
+  if (!keyboardReminder.hidden) {
+    hideKeyboardReminder();
+    return;
+  }
   keyboardReminder.hidden = false;
   keyboardReminder.dataset.fading = 'false';
   reminderTimer = setTimeout(() => {
@@ -36,7 +39,7 @@ screen.addEventListener('pointerdown', event => {
       keyboardReminder.dataset.fading = 'true';
       reminderTimer = setTimeout(hideKeyboardReminder, 160);
     }
-  }, 3000);
+  }, 6000);
 });
 keyboardReminder.addEventListener('pointerdown', event => {
   // Keep keyboard capture when dismissing the notice with the mouse.

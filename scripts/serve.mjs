@@ -14,6 +14,7 @@ const types = {
   '.svg': 'image/svg+xml',
   '.wasm': 'application/wasm',
   '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
 };
 
 export function createDemoServer() {

@@ -51,6 +51,10 @@ test('serve the page with shared-memory headers but not files outside web/', asy
     const font = await fetch(base + '/fonts/InterVariable.woff2');
     assert.equal(font.headers.get('content-type'), 'font/woff2');
     assert.equal(new TextDecoder().decode((await font.arrayBuffer()).slice(0, 4)), 'wOF2');
+    const consoleFont = await fetch(base + '/fonts/TerminusTTF-4.49.3.ttf');
+    assert.equal(consoleFont.status, 200);
+    assert.equal(consoleFont.headers.get('content-type'), 'font/ttf');
+    assert.deepEqual([...new Uint8Array(await consoleFont.arrayBuffer()).slice(0, 4)], [0, 1, 0, 0]);
   } finally {
     server.close();
     server.closeAllConnections();

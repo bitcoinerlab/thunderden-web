@@ -18,6 +18,20 @@ args = parser.parse_args()
 out = args.output.resolve()
 out.mkdir(parents=True, exist_ok=True)
 
+def check_notice_close(page,selector):
+    notice=page.locator(selector)
+    close=notice.locator('.notice-close')
+    assert close.count()==1 and close.inner_text()=='×'
+    assert close.get_attribute('aria-hidden')=='true'
+    card=notice.bounding_box()
+    bounds=close.bounding_box()
+    label=notice.locator(':scope > strong').bounding_box()
+    assert bounds['width']>=24 and bounds['height']>=24,(card,bounds)
+    assert bounds['x']>=label['x']+label['width'],(label,bounds)
+    assert bounds['x']+bounds['width']<=card['x']+card['width'],(card,bounds)
+    assert card['y']<=bounds['y']<=card['y']+4,(card,bounds)
+    assert bounds['y']+bounds['height']<=card['y']+card['height'],(card,bounds)
+
 with sync_playwright() as pw:
     browser = pw.chromium.launch(executable_path=args.chromium, headless=True)
     results = []
@@ -233,6 +247,9 @@ with sync_playwright() as pw:
                 assert reminder['x']>=bounds['x'] and reminder['y']>=bounds['y'],(bounds,reminder)
                 assert reminder['x']+reminder['width']<=bounds['x']+bounds['width'],(bounds,reminder)
                 assert reminder['y']+reminder['height']<=bounds['y']+bounds['height'],(bounds,reminder)
+                assert abs(reminder['x']+reminder['width']/2-bounds['x']-bounds['width']/2)<.5,(bounds,reminder)
+                assert abs(reminder['y']+reminder['height']/2-bounds['y']-bounds['height']/2)<.5,(bounds,reminder)
+                check_notice_close(page,'#keyboard-reminder')
                 page.evaluate("document.querySelector('#keyboard-reminder').hidden=true")
                 exit_bounds=page.locator('#demo-exit').bounding_box()
                 assert page.locator('.expanded-controls #demo-warning').is_visible()
@@ -247,6 +264,15 @@ with sync_playwright() as pw:
                 page.keyboard.press('Escape')
                 assert page.locator('body').get_attribute('data-demo-expanded')=='true','Esc belongs to Thunder Den'
                 page.screenshot(path=str(out/f'expanded-{width}x{height}.png'))
+                page.evaluate("document.querySelector('#boot-cover').hidden=true; document.querySelector('#keyboard-prompt').hidden=false")
+                guide=page.locator('#keyboard-guide').bounding_box()
+                assert guide['width']<=440,guide
+                assert guide['x']>=bounds['x'] and guide['x']+guide['width']<=bounds['x']+bounds['width'],(bounds,guide)
+                assert abs(guide['x']+guide['width']/2-bounds['x']-bounds['width']/2)<.5,(bounds,guide)
+                assert abs(guide['y']+guide['height']/2-bounds['y']-bounds['height']/2)<.5,(bounds,guide)
+                assert page.locator('#keyboard-guide .notice-close').count()==0
+                page.screenshot(path=str(out/f'expanded-ready-{width}x{height}.png'))
+                page.evaluate("document.querySelector('#boot-cover').hidden=false; document.querySelector('#keyboard-prompt').hidden=true")
                 page.locator('#demo-exit').click()
                 assert page.locator('body').get_attribute('data-demo-expanded')=='false'
                 assert page.locator('.laptop-art').is_visible()
@@ -273,24 +299,67 @@ with sync_playwright() as pw:
                 assert page.locator('#device').is_visible()
                 assert page.locator('#phone-demo').is_hidden()
                 assert len(pending) == 2, 'Returning to a wide layout restarted the emulator'
-            if not touch and width>=800:
+            if width>=768:
                 # Layout-only preview of the ready prompt; no fabricated guest pixels.
                 page.evaluate("document.querySelector('#boot-cover').hidden=true; document.querySelector('#keyboard-prompt').hidden=false")
                 assert page.locator('#keyboard-wallet-hint').count()==0
                 assert 'wallet' not in page.locator('#keyboard-guide').inner_text().lower()
+                assert page.locator('.keyboard-ready').count()==0
+                assert page.locator('#keyboard-instructions').inner_text()=='Click the screen to control Thunder Den'
+                assert page.locator('#keyboard-release').inner_text()=='Click outside the screen to use your keyboard normally again.'
+                assert page.locator('#keyboard-prompt').get_attribute('aria-label')=='Click the screen to control Thunder Den'
+                assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backdropFilter')=='none'
+                assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backgroundColor')=='rgba(0, 0, 0, 0.2)'
+                assert 'monospace' in page.locator('#keyboard-guide').evaluate('element=>getComputedStyle(element).fontFamily')
+                assert page.evaluate('''[...document.fonts].some(font=>font.family.includes('Terminus') && font.status==='loaded')''')
+                notices=page.evaluate('''() => ['#keyboard-guide','#keyboard-reminder'].map(selector => {
+                    const style=getComputedStyle(document.querySelector(selector));
+                    return Object.fromEntries(['fontFamily','backgroundColor','borderTopColor','borderTopWidth','borderRadius','boxShadow','padding'].map(key=>[key,style[key]]));
+                })''')
+                assert notices[0].pop('padding')=='8px 14px',notices
+                assert notices[1].pop('padding')=='8px 34px',notices
+                assert notices[0]==notices[1],notices
+                assert 'Terminus' in notices[0]['fontFamily'],notices
+                assert notices[0]['backgroundColor']=='rgb(43, 46, 38)',notices
+                assert notices[0]['borderTopColor']=='rgb(247, 147, 26)',notices
+                assert notices[0]['borderRadius']=='2px',notices
                 screen=page.locator('#screen-wrapper').bounding_box()
                 guide=page.locator('#keyboard-guide').bounding_box()
+                assert guide['width']<=440,guide
+                assert page.locator('#keyboard-instructions').evaluate('element=>getComputedStyle(element).fontSize')=='18px'
+                title=page.locator('#keyboard-instructions')
+                assert title.bounding_box()['height']<=title.evaluate('element=>parseFloat(getComputedStyle(element).lineHeight)')+.5
+                assert page.locator('#keyboard-shortcuts').evaluate('element=>getComputedStyle(element).fontSize')=='16px'
+                release=page.locator('#keyboard-release')
+                assert release.evaluate('element=>getComputedStyle(element).fontSize')=='16px'
+                line_height=release.evaluate('element=>parseFloat(getComputedStyle(element).lineHeight)')
+                assert line_height<release.bounding_box()['height']<=line_height*2+.5
                 assert guide['x']>=screen['x'] and guide['y']>=screen['y'],(screen,guide)
                 assert guide['x']+guide['width']<=screen['x']+screen['width'],(screen,guide)
                 assert guide['y']+guide['height']<=screen['y']+screen['height'],(screen,guide)
+                assert abs(guide['x']+guide['width']/2-screen['x']-screen['width']/2)<.5,(screen,guide)
+                assert abs(guide['y']+guide['height']/2-screen['y']-screen['height']/2)<.5,(screen,guide)
+                assert page.locator('#keyboard-guide').evaluate('element=>element.scrollWidth<=element.clientWidth')
+                assert page.locator('#keyboard-guide .notice-close').count()==0
                 page.screenshot(path=str(out/f'ready-{width}x{height}.png'))
                 page.evaluate("document.querySelector('#keyboard-prompt').hidden=true; document.querySelector('#keyboard-reminder').hidden=false")
                 reminder=page.locator('#keyboard-reminder').bounding_box()
                 assert reminder['x']>=screen['x'] and reminder['y']>=screen['y'],(screen,reminder)
                 assert reminder['x']+reminder['width']<=screen['x']+screen['width'],(screen,reminder)
                 assert reminder['y']+reminder['height']<=screen['y']+screen['height'],(screen,reminder)
+                assert abs(reminder['x']+reminder['width']/2-screen['x']-screen['width']/2)<.5,(screen,reminder)
+                assert abs(reminder['y']+reminder['height']/2-screen['y']-screen['height']/2)<.5,(screen,reminder)
                 assert page.locator('#keyboard-reminder').get_by_role('button',name='Dismiss keyboard reminder').count()==1
+                assert page.locator('#keyboard-reminder > strong').inner_text()=='Use your keyboard, not the mouse'
+                assert page.locator('#keyboard-reminder > strong').evaluate('element=>getComputedStyle(element).fontSize')=='18px'
+                assert page.locator('#keyboard-reminder > span').evaluate_all('elements=>elements.every(element=>getComputedStyle(element).fontSize==="16px")')
                 assert page.locator('#keyboard-reminder').evaluate('element=>element.scrollWidth<=element.clientWidth')
+                check_notice_close(page,'#keyboard-reminder')
+                veil=page.locator('#screen-wrapper').evaluate('''element => {
+                    const style=getComputedStyle(element,'::after');
+                    return {background:style.backgroundColor,pointerEvents:style.pointerEvents,content:style.content};
+                }''')
+                assert veil=={'background':'rgba(0, 0, 0, 0.2)','pointerEvents':'none','content':'""'},veil
                 page.wait_for_timeout(200)
                 page.screenshot(path=str(out/f'keyboard-reminder-{width}x{height}.png'))
                 page.emulate_media(reduced_motion='reduce')
@@ -298,6 +367,7 @@ with sync_playwright() as pw:
                 assert page.locator('#keyboard-reminder').evaluate('element=>getComputedStyle(element).transitionDuration')=='0s'
                 page.emulate_media(reduced_motion='no-preference')
                 page.evaluate("document.querySelector('#boot-cover').hidden=false; document.querySelector('#keyboard-reminder').hidden=true")
+                assert page.locator('#screen-wrapper').evaluate("element=>getComputedStyle(element,'::after').content")=='none'
             if not touch and width == 1366:
                 page.locator('.site-header nav a').filter(has_text='How it works').click()
                 page.wait_for_function('window.scrollY > 100')
@@ -352,7 +422,7 @@ with sync_playwright() as pw:
     print('PASS: narrow layouts show product information only, with no emulator downloads or wallet/start buttons')
     print('PASS: visible laptop/tablet demos start automatically; resizing hides/restores without restarting')
     print('PASS: details anchor and phone companion with public SeedQR/manual words; no real-wallet inputs or camera request')
-    print('PASS: phone/laptop illustration fits the entry card; ready prompt stays focused on keyboard control')
+    print('PASS: centered keyboard notices have close cues and a light veil without blur in normal and expanded displays')
     print('PASS: natural page flow reveals details on tall screens; power button replaces the demo toolbar')
     print('PASS: expanded display fits laptop/tablet layouts; Back/F8 exits, Esc does not and no guest is restarted')
     print('PASS: image failures retain in-screen diagnostics and recovery without a permanent About button')

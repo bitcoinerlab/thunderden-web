@@ -47,28 +47,38 @@ Widening can start it normally. Resizing an existing guest hides/restores the
 same guest rather than restarting; entering the narrow layout releases keyboard
 input and cancels camera capture. Height alone never disables a full-width laptop.
 
-Website download and boot bars are 14px high with rounded orange fills. Download
-percentages sit beside their labels; a subtle sheen stays inside the measured
-fill. Connecting and indeterminate waiting use a moving activity band instead.
-Completed downloads show "✓ Ready" with a solid, still bar. Boot progress remains
-an estimate and switches to activity after ten seconds, completing only on real
-guest readiness. Reduced motion disables the effects. The standalone Preview 8
-keeps its original loading presentation.
+Website loading, boot details and keyboard notices use locally served Terminus
+inside the virtual display; the surrounding website keeps Inter. Download and
+boot bars are 14px high with square orange segments. Download percentages sit
+beside their labels; stepped activity stays inside the measured fill. Connecting
+and indeterminate waiting use a moving activity band instead. Completed downloads
+show "✓ Ready" with full, still segments. Boot progress remains an estimate and
+switches to activity after ten seconds, completing only on real guest readiness.
+Reduced motion disables the effects. The standalone Preview 8 keeps its original
+loading presentation.
 
 There is no toolbar, keyboard-help footer or warning strip below the laptop. The
-initial in-screen prompt explains keyboard capture and release; screen-reader
-status updates remain available. An enlarged power-button overlay matches the
-existing laptop artwork, has a hover/focus "Restart demo" label and restarts
-immediately without confirmation. Restart stops capture before reloading the
-page and boots a fresh guest; it does not retain the demo session.
+initial in-screen prompt explains keyboard capture and release without a close
+icon: "Click the screen to control Thunder Den" and "Click outside the screen to
+use your keyboard normally again." Keep the prompt at most 440px wide, within
+the display's available space, and wrap naturally without shrinking the font.
+Both keyboard notices use 18px headings and 16px instruction text and key hints.
+They are centered above a light 20% dark veil without blur, with a charcoal
+background and a thin orange border. Screen-reader status updates remain
+available. An enlarged power-button overlay matches the existing laptop artwork,
+has a hover/focus "Restart demo" label and restarts immediately without
+confirmation. Restart stops capture before reloading the page and boots a fresh
+guest; it does not retain the demo session.
 
 After keyboard capture, additional primary clicks on the guest display show a
-small "Use your keyboard" reminder with arrow, Enter, Esc and number-key guidance.
-It fades out after three seconds without another screen click or disappears
-immediately on keyboard input, loss of focus or a click on the reminder itself.
-Further screen clicks renew the timeout without blinking; there is no cooldown.
-Clicking the reminder keeps keyboard capture and does not reopen it or inject
-guest input. It never pauses the guest. The reminder stays within the display in
+small "Use your keyboard, not the mouse" reminder with arrow, Enter, Esc and
+number-key guidance. It fades out after six seconds or disappears immediately on
+keyboard input, loss of focus or a click on the reminder or the rest of the guest
+display. A small close cue appears at its top right. A click while the reminder
+is visible only dismisses it; it does not reopen it
+or renew the timeout. A later screen click can show it again without a cooldown.
+Dismissal within the display keeps keyboard capture and does not inject guest
+input. It never pauses the guest. The reminder stays within the display in
 normal and expanded views and has no fade when reduced motion is requested. The
 standalone Preview 8 is unchanged.
 

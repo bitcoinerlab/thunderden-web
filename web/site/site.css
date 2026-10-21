@@ -5,6 +5,13 @@
   font-weight: 100 900;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Terminus (TTF)';
+  src: url('../fonts/TerminusTTF-4.49.3.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 body.website, body.wallet-page {
   height: auto;
   min-height: 100svh;
@@ -60,29 +67,47 @@ body.website, body.wallet-page {
 .website .laptop-art, .website .device-brand, .website #camera-led { display: block; }
 .website #screen-wrapper { left: 13.214286%; top: 5.903614%; width: 73.571429%; height: 62.048193%; }
 .website #screen { image-rendering: pixelated; }
+.website #boot-cover, .website #boot-controls, .website #keyboard-prompt, #keyboard-reminder { font-family: 'Terminus (TTF)', ui-monospace, monospace; font-synthesis: none; }
+.website .boot-card { width: min(480px,100%); text-align: left; }
+.website #boot-title { color: #faf9f6; font-size: 18px; font-weight: 400; line-height: 1.5; letter-spacing: .04em; text-transform: uppercase; }
+.website #boot-title::before { content: '> '; color: #f7931a; }
+.website #boot-message, .website #boot-estimate { color: #babdb3; font-size: 16px; line-height: 1.5; }
+.website #boot-estimate { margin: 16px 0 0; }
+.website #startup { margin-top: 24px; }
 .website #startup li { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: baseline; gap: 8px 12px; margin-bottom: 18px; }
 .website #startup li:last-child { margin-bottom: 0; }
-.website #startup label { min-width: 0; font-weight: 500; }
+.website #startup label { min-width: 0; color: #faf9f6; font-size: 16px; font-weight: 400; }
+.website #startup .asset-size { color: #92978b; }
 .website #startup .asset-progress { display: contents; }
-.website #startup small { grid-column: 2; grid-row: 1; color: #faf9f6; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.website #startup progress, .website #boot-progress-bar { grid-column: 1 / -1; grid-row: 2; width: 100%; height: 14px; margin: 0; appearance: none; border: 1px solid #55594f; border-radius: 999px; overflow: hidden; background: #33362e; }
-.website #startup progress::-webkit-progress-bar, .website #boot-progress-bar::-webkit-progress-bar { border-radius: 999px; background: #33362e; }
-.website #startup progress::-webkit-progress-value, .website #boot-progress-bar::-webkit-progress-value { border-radius: 999px; background: #f7931a; }
-.website #startup progress::-moz-progress-bar, .website #boot-progress-bar::-moz-progress-bar { border-radius: 999px; background: #f7931a; }
+.website #startup small { grid-column: 2; grid-row: 1; color: #faf9f6; font-size: 16px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.website #startup progress, .website #boot-progress-bar { grid-column: 1 / -1; grid-row: 2; width: 100%; height: 14px; margin: 0; appearance: none; border: 0; border-radius: 0; overflow: hidden; background: #33362e; mask-image: repeating-linear-gradient(90deg,#000 0 8px,transparent 8px 11px); }
+.website #startup progress::-webkit-progress-bar, .website #boot-progress-bar::-webkit-progress-bar { border-radius: 0; background: #33362e; }
+.website #startup progress::-webkit-progress-value, .website #boot-progress-bar::-webkit-progress-value { border-radius: 0; background: #f7931a; }
+.website #startup progress::-moz-progress-bar, .website #boot-progress-bar::-moz-progress-bar { border-radius: 0; background: #f7931a; }
 .website #startup progress:indeterminate::-moz-progress-bar, .website #boot-progress-bar:indeterminate::-moz-progress-bar { background: transparent; }
-.website #boot-progress { position: relative; }
-.website #startup [data-state="active"] .asset-progress::after, .website #boot-progress::after { content: ''; width: max(0px,calc(var(--startup-progress,0%) - 2px)); height: 12px; border-radius: 999px; background: linear-gradient(100deg,transparent 25%,#fff6 45%,transparent 65%) 100% 0 / 200% 100%; pointer-events: none; animation: startup-sheen 2.2s linear infinite; }
-.website #startup .asset-progress::after { grid-column: 1 / -1; grid-row: 2; align-self: center; margin-left: 1px; }
-.website #boot-progress::after { position: absolute; left: 1px; top: 1px; }
-.website #startup [data-state="active"]:has(progress:is(:indeterminate,[value="0"])) .asset-progress::after, .website #boot-progress:has(progress:indeterminate)::after { width: calc(100% - 2px); background-image: linear-gradient(90deg,transparent 35%,#f7931a 50%,transparent 65%); }
+.website #boot-progress { position: relative; width: 100%; margin: 20px 0 0; }
+.website #startup [data-state="active"] .asset-progress::after, .website #boot-progress::after { content: ''; width: var(--startup-progress,0%); height: 14px; background: linear-gradient(90deg,transparent 42%,#faf9f680 42% 50%,transparent 50%) 100% 0 / 200% 100%; mask-image: repeating-linear-gradient(90deg,#000 0 8px,transparent 8px 11px); pointer-events: none; animation: startup-sheen 2.2s steps(24) infinite; }
+.website #startup .asset-progress::after { grid-column: 1 / -1; grid-row: 2; align-self: center; }
+.website #boot-progress::after { position: absolute; left: 0; top: 0; }
+.website #startup [data-state="active"]:has(progress:is(:indeterminate,[value="0"])) .asset-progress::after, .website #boot-progress:has(progress:indeterminate)::after { width: 100%; background-image: linear-gradient(90deg,transparent 42%,#f7931a 42% 50%,transparent 50%); }
 .website #boot-progress:has(progress[value="1"])::after { content: none; }
 @keyframes startup-sheen { to { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .website #startup [data-state="active"] .asset-progress::after, .website #boot-progress::after { animation: none; } }
-#keyboard-reminder { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 10px 14px; border: 1px solid #f7931a; border-radius: 8px; background: #242620f5; color: #faf9f6; box-shadow: 0 4px 16px #0003; text-align: center; font-size: 12px; line-height: 1.6; transition: opacity 160ms ease-out; }
+.website #keyboard-prompt { grid-template-columns: minmax(0,1fr); place-items: center; padding: 12px; background: #0003; backdrop-filter: none; }
+.website #screen-wrapper:has(#keyboard-reminder:not([hidden]))::after { content: ''; position: absolute; inset: 0; z-index: 1; background: #0003; pointer-events: none; }
+.website #keyboard-guide, #keyboard-reminder { padding: 8px 34px; border: 1px solid #f7931a; border-radius: 2px; background: #2b2e26; color: #faf9f6; box-shadow: 0 3px 0 #0009, 0 8px 20px #0006; text-align: center; }
+.website #keyboard-guide { position: relative; width: max-content; max-width: min(440px,100%); padding-inline: 14px; }
+.notice-close { position: absolute; top: 2px; right: 2px; display: grid; place-items: center; width: 28px; height: 28px; color: #faf9f6; font-size: 20px; line-height: 1; }
+.website #keyboard-instructions, #keyboard-reminder strong { color: #faf9f6; font-size: 18px; font-weight: 400; line-height: 1.5; }
+.website #keyboard-instructions::before, #keyboard-reminder strong::before { content: '[ '; color: #f7931a; }
+.website #keyboard-instructions::after, #keyboard-reminder strong::after { content: ' ]'; color: #f7931a; }
+.website #keyboard-instructions strong { font-weight: 400; }
+.website .guide-keys, .website .keyboard-release, #keyboard-reminder > span { display: block; margin-top: 5px; color: #d2d5c9; font-size: 16px; line-height: 1.4; }
+.website .keyboard-release { margin-top: 2px; }
+#keyboard-reminder { position: absolute; left: 50%; top: 50%; z-index: 2; transform: translate(-50%,-50%); width: max-content; max-width: calc(100% - 24px); transition: opacity 160ms ease-out; }
 #keyboard-reminder[data-fading="true"] { opacity: 0; }
-#keyboard-reminder strong { display: block; font-size: 13px; font-weight: 600; }
-#keyboard-reminder span { display: block; margin-top: 3px; }
-#keyboard-reminder kbd { display: inline-block; padding: 0 4px; border: 1px solid #62665d; border-radius: 3px; background: #30332c; color: #faf9f6; }
+#keyboard-reminder strong { display: block; }
+#keyboard-reminder kbd { color: #faf9f6; }
 #keyboard-reminder button { position: absolute; inset: 0; width: 100%; border: 0; border-radius: inherit; background: transparent; }
 @media (prefers-reduced-motion: reduce) { #keyboard-reminder { transition: none; } }
 .demo-note { max-width: 580px; margin: 0 20px; color: #686b63; font-size: 11px; line-height: 1.6; text-align: center; }

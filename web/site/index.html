@@ -50,14 +50,14 @@
           <img class="device-brand deck-brand" src="./brand/thunderden-horizontal-paper.svg" alt="" aria-hidden="true">
           <span id="camera-led" data-active="false" aria-hidden="true"></span>
           <section id="screen-wrapper" aria-label="Virtual laptop display">
-            <canvas id="screen" width="640" height="400" tabindex="0" inert data-ready="false" data-keyboard="released" aria-label="Thunder Den virtual computer screen" aria-describedby="keyboard-instructions demo-warning"></canvas>
+            <canvas id="screen" width="640" height="400" tabindex="0" inert data-ready="false" data-keyboard="released" aria-label="Thunder Den virtual computer screen" aria-describedby="keyboard-instructions keyboard-release demo-warning"></canvas>
             <section id="boot-cover" aria-labelledby="boot-title">
               <div class="boot-card">
                 <h2 id="boot-title" role="status">Loading Thunder Den...</h2>
                 <p id="boot-message">A real Linux system with Bitcoin Core's cryptography, right in your browser.</p>
                 <div id="startup"><ol>
-                  <li id="startup-image"><label for="image-progress">Thunder Den image<span class="asset-size"> &middot; 64 MiB</span></label><div class="asset-progress"><progress id="image-progress" max="1" value="0"></progress><small></small></div></li>
-                  <li id="startup-wasm"><label for="wasm-progress">Browser x86-64 emulator<span class="asset-size"></span></label><div class="asset-progress"><progress id="wasm-progress" max="1" value="0"></progress><small>Connecting...</small></div></li>
+                  <li id="startup-image"><label for="image-progress">System image<span class="asset-size"> &middot; 64 MiB</span></label><div class="asset-progress"><progress id="image-progress" max="1" value="0"></progress><small></small></div></li>
+                  <li id="startup-wasm"><label for="wasm-progress">Emulator<span class="asset-size"></span></label><div class="asset-progress"><progress id="wasm-progress" max="1" value="0"></progress><small>Connecting...</small></div></li>
                 </ol></div>
                 <div id="boot-progress" hidden><progress id="boot-progress-bar" max="1" value="0" aria-label="Estimated startup progress"></progress></div>
                 <p id="boot-estimate" hidden><span>Usually around 10 seconds.</span> <span>Slower devices may take longer.</span></p>
@@ -66,8 +66,8 @@
                 <button id="boot-diagnostics" type="button" hidden>View details</button>
               </div>
             </section>
-            <button id="keyboard-prompt" type="button" hidden aria-controls="screen" aria-label="Click the screen to capture keyboard input" aria-describedby="keyboard-shortcuts"><span id="keyboard-guide"><span class="keyboard-ready">Thunder Den is ready</span><span id="keyboard-instructions"><strong>Click the screen</strong> to capture keyboard input.<br><strong>Click outside</strong> to release it.</span><span id="keyboard-shortcuts" class="guide-keys"><kbd>&uarr; &darr;</kbd> navigate &middot; <kbd>Enter</kbd> select &middot; <kbd>Esc</kbd> back</span></span></button>
-            <div id="keyboard-reminder" hidden role="status" aria-live="polite" aria-atomic="true"><strong>Use your keyboard</strong><span><kbd>&uarr;</kbd> <kbd>&darr;</kbd> navigate &middot; <kbd>Enter</kbd> select &middot; <kbd>Esc</kbd> back</span><span>Number keys select numbered options.</span><button type="button" tabindex="-1" aria-label="Dismiss keyboard reminder"></button></div>
+            <button id="keyboard-prompt" type="button" hidden aria-controls="screen" aria-label="Click the screen to control Thunder Den" aria-describedby="keyboard-shortcuts keyboard-release"><span id="keyboard-guide"><span id="keyboard-instructions"><strong>Click the screen</strong> to control Thunder Den</span><span id="keyboard-shortcuts" class="guide-keys"><kbd>&uarr; &darr;</kbd> navigate &middot; <kbd>Enter</kbd> select &middot; <kbd>Esc</kbd> back</span><span id="keyboard-release" class="keyboard-release">Click outside the screen to use your keyboard normally again.</span></span></button>
+            <div id="keyboard-reminder" hidden role="status" aria-live="polite" aria-atomic="true"><strong>Use your keyboard, not the mouse</strong><span><kbd>&uarr;</kbd> <kbd>&darr;</kbd> navigate &middot; <kbd>Enter</kbd> select &middot; <kbd>Esc</kbd> back</span><span>Number keys select numbered options.</span><button type="button" tabindex="-1" aria-label="Dismiss keyboard reminder"><span class="notice-close" aria-hidden="true">&times;</span></button></div>
             <section id="camera-request" hidden role="dialog" aria-labelledby="camera-request-title" aria-describedby="camera-request-message"><div class="camera-card"><h2 id="camera-request-title">Camera access is needed</h2><p id="camera-request-message">The virtual device needs your camera.</p><p class="camera-local">Images stay on your device.</p><p id="camera-fallback" hidden>You can still enter public test recovery words and view public keys.</p><p id="camera-request-waiting" hidden role="status">Waiting for browser permission...</p><div class="camera-actions"><button id="camera-enable" type="button">Enable camera</button><button id="camera-cancel" type="button">Cancel</button></div></div></section>
             <div id="boot-controls" hidden><button id="boot-details" type="button" disabled aria-controls="screen" aria-expanded="false">Show boot details</button></div>
           </section>

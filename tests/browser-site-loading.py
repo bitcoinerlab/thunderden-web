@@ -59,6 +59,10 @@ with sync_playwright() as pw:
         page.evaluate('document.fonts.ready')
         assert page.locator('#startup li small').all_text_contents()==['Connecting…','Connecting…']
         assert page.locator('#image-progress').get_attribute('value')=='0'
+        assert page.locator('#boot-title').evaluate('element=>getComputedStyle(element).textTransform')=='uppercase'
+        assert 'monospace' in page.locator('#boot-title').evaluate('element=>getComputedStyle(element).fontFamily')
+        assert page.evaluate('''[...document.fonts].some(font=>font.family.includes('Terminus') && font.status==='loaded')''')
+        assert 'Terminus' in page.locator('#boot-title').evaluate('element=>getComputedStyle(element).fontFamily')
         assert changing_pixels('#startup-image','#image-progress')['fill']>0
         page.screenshot(path=str(out/'connecting.png'))
         page.evaluate('''() => {
@@ -77,6 +81,8 @@ with sync_playwright() as pw:
             for name in ['image','wasm']:
                 bar=page.locator('#'+name+'-progress')
                 assert bar.bounding_box()['height']==14
+                assert bar.evaluate('element=>getComputedStyle(element).borderRadius')=='0px'
+                assert 'repeating-linear-gradient' in bar.evaluate('element=>getComputedStyle(element).maskImage')
                 label=page.locator('#startup-'+name+' label').bounding_box()
                 detail=page.locator('#startup-'+name+' small').bounding_box()
                 assert label['x']+label['width']<=detail['x']
@@ -100,7 +106,13 @@ with sync_playwright() as pw:
             const boot=document.querySelector('#boot-progress');boot.hidden=false;
             boot.style.setProperty('--startup-progress','60%');
             document.querySelector('#boot-progress-bar').value=.6;
+            document.querySelector('#boot-title').textContent='Booting Thunder Den...';
+            document.querySelector('#boot-estimate').hidden=false;
+            document.querySelector('#boot-controls').hidden=false;
+            document.querySelector('#boot-details').disabled=false;
         }''')
+        assert page.locator('#boot-details').is_visible()
+        assert 'Terminus' in page.locator('#boot-details').evaluate('element=>getComputedStyle(element).fontFamily')
         assert page.locator('#boot-progress-bar').bounding_box()['height']==14
         changes=changing_pixels('#boot-progress','#boot-progress-bar',.6)
         assert changes['fill']>0 and changes['track']==0,changes
@@ -112,9 +124,9 @@ with sync_playwright() as pw:
         assert page.locator('#boot-progress').evaluate('element=>element.getAnimations({subtree:true}).length')==0
         assert changing_pixels('#boot-progress','#boot-progress-bar')=={'fill':0,'track':0}
         assert not errors,errors
-        print('PASS: connecting activity, 14px bars and aligned percentages fit compact laptop and tablet layouts')
-        print('PASS: shimmer changes only the measured fill; completed bars are solid and reduced motion is static')
-        print('PASS: estimated boot and indeterminate waiting use the same thicker bars and motion preferences')
+        print('PASS: monospace loading, square segmented 14px bars and aligned percentages fit compact laptop and tablet layouts')
+        print('PASS: activity changes only the measured fill; completed bars and reduced motion are static')
+        print('PASS: estimated boot and indeterminate waiting use the same segmented bars and motion preferences')
     finally:
         for route in pending:route.abort()
         page.unroute_all(behavior='wait')
