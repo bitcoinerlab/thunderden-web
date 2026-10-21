@@ -1,9 +1,8 @@
-// The website release and original Preview 8 demo are pinned separately.
+// Local test build only. Restore the published release pin before deployment.
 export const RELEASE = {
-  tag: 'v0.0.1-preview.11',
-  url: 'https://github.com/bitcoinerlab/thunderden/releases/download/v0.0.1-preview.11/thunderden.img',
+  tag: 'development-2082731-01f31c423c',
   imagePath: './assets/site/thunderden.img',
-  sha256: 'e9c9e622ae3c129d85c636b8c2421e432130e78c063caadf61126931fb317242',
+  sha256: '0c22d04d73a2f9c24cd35451bbeb9488c5efc732639b535573039b2d3cae0daf',
   bytes: 67108864,
   contentBytes: 16036899,
 };

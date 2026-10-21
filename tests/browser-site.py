@@ -42,6 +42,20 @@ with sync_playwright() as pw:
             assert page.locator('.demo-footer, .website .warning, #about').count()==0
             assert page.locator('#device #restart').get_attribute('aria-label')=='Restart demo'
             assert page.locator('#camera-panel #camera').count()==1
+            sections=page.locator('.details-grid > article')
+            assert sections.locator('h3').all_text_contents()==[
+                'Bring your own laptop','Review the code with AI. Build it yourself.',
+                'A fresh start, every time','Take security further']
+            assert sections.locator('.section-number').all_text_contents()==['01','02','03','04']
+            assert sections.nth(2).locator('p').all_text_contents()==[
+                "Boot your laptop from USB, then enter or scan your recovery words to load your Bitcoin keys into RAM. Thunder Den never saves them to the USB or the laptop's drive.",
+                'The system is built without support for disk storage, Wi-Fi, Bluetooth or Ethernet. You load your keys again each session, so keep your recovery-word backup safe.']
+            fresh=sections.nth(2).bounding_box()
+            security=sections.nth(3).bounding_box()
+            if width>600:
+                assert abs(fresh['y']-security['y'])<1 and fresh['x']+fresh['width']<security['x'],(fresh,security)
+            else:
+                assert fresh['y']+fresh['height']<=security['y'],(fresh,security)
             narrow=width<=767 or (width<=999 and height<=500)
             if narrow:
                 assert page.locator('body').get_attribute('data-demo-state')=='narrow'
@@ -320,4 +334,5 @@ with sync_playwright() as pw:
     print('PASS: expanded display fits laptop/tablet layouts; Back/F8 exits, Esc does not and no guest is restarted')
     print('PASS: image failures retain in-screen diagnostics and recovery without a permanent About button')
     print('PASS: dismissible keyboard reminder fits normal and expanded displays and respects reduced motion')
+    print('PASS: four renumbered details blocks retain the USB/RAM explanation beside the security guide, stacking on phones')
     browser.close()

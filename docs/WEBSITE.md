@@ -187,7 +187,8 @@ usual operating system. Introduce the USB as the carrier for the software before
 discussing builds. Recovery words and keys are used in memory for the session;
 the wallet app stays online while the laptop signs offline.
 
-Follow with six short sections and links to the technical material:
+Follow with four short sections in a two-column grid and links to the technical
+material:
 
 1. **Bring your own laptop**: general-purpose hardware can predate the project.
    There is no Thunder Den hardware shipment, but existing hardware and firmware
@@ -197,23 +198,24 @@ Follow with six short sections and links to the technical material:
 2. **Review the code with AI. Build it yourself.**: AI auditability is a design principle.
    Invite independent review, tests and builds from pinned sources. AI findings
    need verification; Linux, Bitcoin Core and build tools remain dependencies.
-3. **A big screen. A real keyboard.**: comfortable transaction review and recovery
-   input compared with a typical hardware wallet. Keep this to one short paragraph.
-4. **Your wallet app. Your spending rules.**: Sparrow works directly; Liana uses
-   the project's modified version and QR bridge. Mention support for many other
-   wallets with QR-based air-gapped signing. Mention descriptor-based wallets,
-   multisig and Miniscript policies, including time-delayed recovery. Keep setup
-   details in the linked wallet guides without implying every wallet is compatible.
-5. **A fresh session, every time**: one short paragraph on RAM-only wallet data,
-   recovery input for each session and reusing or recreating the USB. Keep the
-   recovery-word backup reminder. Omit scanner internals and standalone technical links.
-6. **Take security further**: Secure Boot, a BIOS password and removal of
+3. **A fresh start, every time**: boot from USB, then enter or scan recovery words
+   to load Bitcoin keys into RAM, never saved to the USB or the laptop's drive.
+   Explain that the system is built without support for disk storage, Wi-Fi,
+   Bluetooth or Ethernet. Keys are loaded again each session; keep the
+   recovery-word backup reminder. Do not imply automatic key loading at boot,
+   physical USB write protection, guaranteed erasure of every trace in RAM or
+   immunity from hardware or firmware attacks.
+4. **Take security further**: Secure Boot, a BIOS password and removal of
    storage/radio modules on suitable models. Keep the page's startup explanation
    short: boot only signed Thunder Den USB images and protect BIOS access with a
    password. Leave image signing, firmware terminology and setup details to the
    linked Secure Boot guide. Link a public laptop-disassembly example. Restricting
    boot to the intended signatures requires compatible firmware, only the intended
    trusted key and no legacy bypass. This checks software, not a particular USB stick.
+
+Omit separate screen/keyboard and wallet-policy feature blocks to keep the page
+short. Wallet compatibility, multisig and Miniscript details remain in the
+project guides. Stack the four sections in one column on phones.
 
 Finish with the x86-64 Intel/AMD requirement, download/checksum steps and USB guide.
 Keep the introduction concise and omit the standalone preview warning and Apple
@@ -242,24 +244,24 @@ the BitcoinerLAB family of open-source Bitcoin tools, linking the organization.
 ## Local preview
 
 The original demo at `/` and the existing labelled bundles remain available.
-The website profile uses a separate verified copy of the published Preview 11
-image, without changing the Preview 8 pin or guest bytes:
+The website profile uses a separate verified copy of an unsigned local test
+image, without changing the Preview 8 pin or guest bytes. Supply the matching
+image explicitly because this build is not a published release:
 
 ```sh
-npm run setup:site
+npm run setup:site -- /path/to/thunderden.img
 npm start
 ```
 
-The website is pinned to the unsigned image from
-[`v0.0.1-preview.11`](https://github.com/bitcoinerlab/thunderden/releases/tag/v0.0.1-preview.11),
-with SHA-256 `e9c9e622ae3c129d85c636b8c2421e432130e78c063caadf61126931fb317242`.
-Its bytes match the previously tested development image. It includes offscreen QR
-rendering and steady captions. Browser checks covered actual signing and eight
-seconds of animated replies: all 154 sampled frames decoded, without blank/white
-redraw stages or caption changes. This does not guarantee tear-free rendering on
-every framebuffer, browser or device. Physical two-device acceptance remains
-separate. `setup:site` downloads the pinned release or accepts a matching local
-image path as its optional argument.
+The local website is pinned to `development-2082731-01f31c423c`, built from
+Thunder Den commit `20827311dfb0bad100095544a309812d5c0e0363`, with SHA-256
+`0c22d04d73a2f9c24cd35451bbeb9488c5efc732639b535573039b2d3cae0daf`.
+Chromium checks on this image covered boot, public SeedQR import, keyboard
+capture and reminders, resizing, expanded mode, camera controls and restart
+using synthetic video. These checks do not verify physical devices or a complete
+signing round trip with this new image. Physical two-device acceptance remains
+separate. `setup:site` downloads a release only when its pin includes a public
+download URL. Select published artifacts before deploying beyond local testing.
 
 Open `http://127.0.0.1:4173/site/`. The compatible emulator files must already be
 installed as described in the development guide. Fonts and QR generation are

@@ -81,12 +81,16 @@ signing round trip over HTTPS using synthetic camera streams. All 150 sampled
 animated QR frames decoded, with 23 distinct payloads. These automated checks do
 not verify physical cameras or mobile browsers.
 
-The website uses the unchanged unsigned image from the published
+The deployed preview still uses the unchanged unsigned image from the published
 `v0.0.1-preview.11` release, verified byte-for-byte against the previously tested
 development image. It remains marked `noindex`. Complete the physical
 laptop/phone checks in [WEBSITE.md](WEBSITE.md#pending-manual-acceptance) and test
 mobile browsers before calling the demo ready. Remove the preview indexing rule
 when launching the production website.
+
+The repository's local test profile can differ from that deployed release; see
+[the local preview pin](WEBSITE.md#local-preview). Select published artifacts
+before deploying a local test profile.
 
 The custom domain also passed HTTPS, decoded-checksum, caching and shared-memory
 checks after certificate provisioning completed. Chromium checks on that origin
