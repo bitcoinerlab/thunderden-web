@@ -113,9 +113,12 @@ to learn about the actual USB signer, its design and its own validation status.
 
 ## Development and hosting
 
-The in-progress website preview is at **http://127.0.0.1:4173/site/**, with the
-original demo still at `/`. See [the website notes](docs/WEBSITE.md) to prepare its
-separately pinned release image and review the companion's current scope.
+The experimental website is at **https://thunderden.com/**, with the original
+Preview 8 demo at `/demo/`. For the local website profile, run `npm run setup:site`
+to download the separately pinned, unchanged **Preview 12** image, then open
+**http://127.0.0.1:4173/site/** after `npm start`. The original local demo stays at
+`/`. See [the website notes](docs/WEBSITE.md) for the companion's current scope
+and pending physical-device checks.
 
 Install the pinned development dependencies to run all JavaScript unit tests:
 

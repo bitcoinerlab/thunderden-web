@@ -100,7 +100,7 @@ with sync_playwright() as pw:
         assert page.locator('#boot-progress-bar').evaluate('bar=>getComputedStyle(bar).height')=='14px'
         assert page.locator('#keyboard-reminder').is_hidden()
         assert 'wallet' not in page.locator('#keyboard-guide').inner_text().lower()
-        assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backdropFilter')=='none'
+        assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backdropFilter')=='blur(1px)'
         assert page.locator('.keyboard-ready').count()==0
         assert page.locator('#keyboard-guide .notice-close').count()==0
         assert page.evaluate('''[...document.fonts].some(font=>font.family.includes('Terminus') && font.status==='loaded')''')
@@ -145,6 +145,7 @@ with sync_playwright() as pw:
         assert page.locator('#keyboard-prompt').evaluate('prompt=>document.activeElement===prompt')
         page.keyboard.press('Enter')
         assert page.locator('#keyboard-prompt').is_hidden()
+        assert page.locator('#screen').evaluate('element=>getComputedStyle(element).filter')=='none'
         assert page.locator('#screen-wrapper').evaluate("element=>getComputedStyle(element,'::after').content")=='none'
         assert page.evaluate('siteInput.length')==0,'Activation key reached the guest'
         reminder=page.locator('#keyboard-reminder')
@@ -229,6 +230,15 @@ with sync_playwright() as pw:
         page.locator('#screen').click()
         page.keyboard.press('1')
         page.wait_for_function("!document.querySelector('#camera-request').hidden",timeout=20000)
+        assert page.evaluate('cameraCalls')==0
+        assert page.evaluate("siteQmp.command('query-status').then(status=>!status.running)")
+        assert page.locator('#camera-request').evaluate('element=>getComputedStyle(element).backdropFilter')=='blur(1px)'
+        assert 'Terminus' in page.locator('.camera-card').evaluate('element=>getComputedStyle(element).fontFamily')
+        page.screenshot(path=str(out/'camera-request.png'))
+        page.locator('#expand-demo').click()
+        assert page.locator('#camera-request').is_visible()
+        page.screenshot(path=str(out/'camera-request-expanded.png'))
+        page.keyboard.press('F8')
         assert page.evaluate('cameraCalls')==0
         assert page.evaluate("siteQmp.command('query-status').then(status=>!status.running)")
         page.locator('#camera-enable').click()
@@ -330,7 +340,8 @@ with sync_playwright() as pw:
         assert not errors,errors
         (out/'checks.json').write_text(json.dumps({'display':[640,400],'pixelated':True,
             'laptop_geometry_stable':True,'activation_key_isolated':True,'companion_seedqr_decoded':True,
-            'compact_onboarding_without_blur':True,
+            'compact_onboarding_with_soft_blur':True,
+            'camera_dialog_theme_preserves_explicit_permission':True,
             'centered_keyboard_notices':True,
             'keyboard_reminder_close_cue_preserves_capture':True,'keyboard_veil_clears_with_notice':True,
             'keyboard_reminder_six_second_timeout':True,

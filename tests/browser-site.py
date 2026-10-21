@@ -32,6 +32,22 @@ def check_notice_close(page,selector):
     assert card['y']<=bounds['y']<=card['y']+4,(card,bounds)
     assert bounds['y']+bounds['height']<=card['y']+card['height'],(card,bounds)
 
+def check_demo_modal(page,selector):
+    modal=page.locator(selector)
+    style=modal.evaluate('''element => {
+        const style=getComputedStyle(element);
+        return {font:style.fontFamily,background:style.backgroundColor,border:style.borderTopColor,
+            radius:style.borderRadius,filter:style.filter,backdrop:style.backdropFilter};
+    }''')
+    assert 'Terminus' in style.pop('font'),style
+    assert style=={'background':'rgb(43, 46, 38)','border':'rgb(247, 147, 26)',
+        'radius':'2px','filter':'none','backdrop':'none'},style
+    assert modal.locator('h2').evaluate('element=>getComputedStyle(element).fontSize')=='18px'
+    assert modal.locator('p, summary, pre, button').evaluate_all('''elements=>elements.every(element=>{
+        const style=getComputedStyle(element);
+        return style.fontFamily.includes('Terminus') && style.fontSize==='16px';
+    })''')
+
 with sync_playwright() as pw:
     browser = pw.chromium.launch(executable_path=args.chromium, headless=True)
     results = []
@@ -316,8 +332,8 @@ with sync_playwright() as pw:
                 assert page.locator('#keyboard-instructions').inner_text()=='Click the screen to control Thunder Den'
                 assert page.locator('#keyboard-release').inner_text()=='Click outside the screen to use your keyboard normally again.'
                 assert page.locator('#keyboard-prompt').get_attribute('aria-label')=='Click the screen to control Thunder Den'
-                assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backdropFilter')=='none'
-                assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backgroundColor')=='rgba(0, 0, 0, 0.2)'
+                assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backdropFilter')=='blur(1px)'
+                assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backgroundColor')=='rgba(0, 0, 0, 0.1)'
                 assert 'monospace' in page.locator('#keyboard-guide').evaluate('element=>getComputedStyle(element).fontFamily')
                 assert page.evaluate('''[...document.fonts].some(font=>font.family.includes('Terminus') && font.status==='loaded')''')
                 notices=page.evaluate('''() => ['#keyboard-guide','#keyboard-reminder'].map(selector => {
@@ -365,9 +381,10 @@ with sync_playwright() as pw:
                 check_notice_close(page,'#keyboard-reminder')
                 veil=page.locator('#screen-wrapper').evaluate('''element => {
                     const style=getComputedStyle(element,'::after');
-                    return {background:style.backgroundColor,pointerEvents:style.pointerEvents,content:style.content};
+                    return {background:style.backgroundColor,pointerEvents:style.pointerEvents,
+                        content:style.content,blur:style.backdropFilter};
                 }''')
-                assert veil=={'background':'rgba(0, 0, 0, 0.2)','pointerEvents':'none','content':'""'},veil
+                assert veil=={'background':'rgba(0, 0, 0, 0.1)','pointerEvents':'none','content':'""','blur':'blur(1px)'},veil
                 page.wait_for_timeout(200)
                 page.screenshot(path=str(out/f'keyboard-reminder-{width}x{height}.png'))
                 page.emulate_media(reduced_motion='reduce')
@@ -376,6 +393,26 @@ with sync_playwright() as pw:
                 page.emulate_media(reduced_motion='no-preference')
                 page.evaluate("document.querySelector('#boot-cover').hidden=false; document.querySelector('#keyboard-reminder').hidden=true")
                 assert page.locator('#screen-wrapper').evaluate("element=>getComputedStyle(element,'::after').content")=='none'
+                # Preview only the browser-owned request card; never request a camera.
+                page.evaluate("document.querySelector('#boot-cover').hidden=true; document.querySelector('#camera-request').hidden=false")
+                check_demo_modal(page,'.camera-card')
+                assert page.locator('#camera-request').evaluate('element=>getComputedStyle(element).backdropFilter')=='blur(1px)'
+                assert page.locator('#camera-request').evaluate('element=>getComputedStyle(element).backgroundColor')=='rgba(0, 0, 0, 0.1)'
+                camera=page.locator('.camera-card').bounding_box()
+                assert camera['x']>=screen['x'] and camera['x']+camera['width']<=screen['x']+screen['width'],(screen,camera)
+                assert camera['y']>=screen['y'] and camera['y']+camera['height']<=screen['y']+screen['height'],(screen,camera)
+                assert page.locator('.camera-card').evaluate('element=>element.scrollHeight<=element.clientHeight && element.scrollWidth<=element.clientWidth')
+                page.screenshot(path=str(out/f'camera-request-{width}x{height}.png'))
+                if (width,height) in [(1366,768),(1024,600),(768,501)]:
+                    page.evaluate('''() => {
+                        document.querySelector('#camera-request-title').textContent='Camera unavailable';
+                        document.querySelector('#camera-request-message').textContent='Camera permission denied. Allow access in your browser and system settings, then try again.';
+                        document.querySelector('#camera-fallback').hidden=false;
+                        document.querySelector('#camera-enable').textContent='Try again';
+                    }''')
+                    assert page.locator('.camera-card').evaluate('element=>element.scrollHeight<=element.clientHeight && element.scrollWidth<=element.clientWidth')
+                    page.screenshot(path=str(out/f'camera-unavailable-{width}x{height}.png'))
+                page.evaluate("document.querySelector('#camera-request').hidden=true; document.querySelector('#boot-cover').hidden=false")
             if not touch and width == 1366:
                 page.locator('.site-header nav a').filter(has_text='How it works').click()
                 page.wait_for_function('window.scrollY > 100')
@@ -402,11 +439,18 @@ with sync_playwright() as pw:
             assert page.locator('#retry').is_visible()
             assert page.locator('#restart').is_enabled()
             assert page.locator('#camera').is_disabled()
+            if status==404: page.locator('#expand-demo').click()
             page.locator('#boot-diagnostics').click()
             assert page.locator('#about-dialog').is_visible()
             assert message in page.locator('#log').inner_text()
+            check_demo_modal(page,'#about-dialog')
+            assert page.locator('#about-dialog').evaluate("element=>getComputedStyle(element,'::backdrop').backdropFilter")=='blur(1px)'
+            assert page.locator('#about-dialog').evaluate("element=>getComputedStyle(element,'::backdrop').backgroundColor")=='rgba(0, 0, 0, 0.1)'
+            assert page.locator('#about-dialog').evaluate('element=>element.scrollWidth<=element.clientWidth')
+            page.screenshot(path=str(out/f'diagnostics-{status}.png'))
             page.keyboard.press('Escape')
             assert page.locator('#about-dialog').is_hidden()
+            if status==404: page.keyboard.press('F8')
             assert not errors,errors
             page.screenshot(path=str(out/f'error-{status}.png'))
         finally:
@@ -430,7 +474,7 @@ with sync_playwright() as pw:
     print('PASS: narrow layouts show product information only, with no emulator downloads or wallet/start buttons')
     print('PASS: visible laptop/tablet demos start automatically; resizing hides/restores without restarting')
     print('PASS: details anchor and phone companion with public SeedQR/manual words; no real-wallet inputs or camera request')
-    print('PASS: centered keyboard notices have close cues and a light veil without blur in normal and expanded displays')
+    print('PASS: keyboard, camera and diagnostics dialogs share terminal styling and a light 1px backdrop blur')
     print('PASS: natural page flow reveals details on tall screens; power button replaces the demo toolbar')
     print('PASS: expanded display fits laptop/tablet layouts; Back/F8 exits, Esc does not and no guest is restarted')
     print('PASS: image failures retain in-screen diagnostics and recovery without a permanent About button')

@@ -14,6 +14,6 @@ the font locally and does not contact a font service.
 Its SHA-256 is `f668ad7884635e112bcfa2ced6ccb9550128f643bf539cb049bd90bd8afbf4b3`.
 
 The original SIL Open Font License and copyright notices are included in
-`Terminus-OFL.txt`. The font is served locally for loading and keyboard notices
-inside the website's virtual display. The surrounding website keeps Inter.
+`Terminus-OFL.txt`. The font is served locally for loading and the demo's
+keyboard, camera and diagnostics dialogs. The surrounding website keeps Inter.
 Use the recommended integer pixel sizes rather than fluid font sizing.

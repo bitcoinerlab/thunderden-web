@@ -51,8 +51,8 @@ Widening can start it normally. Resizing an existing guest hides/restores the
 same guest rather than restarting; entering the narrow layout releases keyboard
 input and cancels camera capture. Height alone never disables a full-width laptop.
 
-Website loading, boot details and keyboard notices use locally served Terminus
-inside the virtual display; the surrounding website keeps Inter. Download and
+Website loading, boot details and demo dialogs use locally served Terminus;
+the surrounding website keeps Inter. Download and
 boot bars are 14px high with square orange segments. Download percentages sit
 beside their labels; stepped activity stays inside the measured fill. Connecting
 and indeterminate waiting use a moving activity band instead. Completed downloads
@@ -66,9 +66,11 @@ initial in-screen prompt explains keyboard capture and release without a close
 icon: "Click the screen to control Thunder Den" and "Click outside the screen to
 use your keyboard normally again." Keep the prompt at most 440px wide, within
 the display's available space, and wrap naturally without shrinking the font.
-Both keyboard notices use 18px headings and 16px instruction text and key hints.
-They are centered above a light 20% dark veil without blur, with a charcoal
-background and a thin orange border. Screen-reader status updates remain
+Keyboard, camera and diagnostics dialogs use 18px headings and 16px body text and
+key hints. They share a charcoal background, nearly square corners, a thin orange
+border and matching buttons. Their backdrop has 1px blur and 10% darkening only
+while open; closing restores the unfiltered display. Browser permission prompts
+are controlled by the browser, not the website. Screen-reader status updates remain
 available. An enlarged power-button overlay matches the existing laptop artwork,
 has a hover/focus "Restart demo" label and restarts immediately without
 confirmation. Restart stops capture before reloading the page and boots a fresh
@@ -265,24 +267,24 @@ the BitcoinerLAB family of open-source Bitcoin tools, linking the organization.
 ## Local preview
 
 The original demo at `/` and the existing labelled bundles remain available.
-The website profile uses a separate verified copy of an unsigned local test
-image, without changing the Preview 8 pin or guest bytes. Supply the matching
-image explicitly because this build is not a published release:
+The website profile uses a separate verified copy of the published unsigned
+`v0.0.1-preview.12` image, without changing the Preview 8 pin or guest bytes:
 
 ```sh
-npm run setup:site -- /path/to/thunderden.img
+npm run setup:site
 npm start
 ```
 
-The local website is pinned to `development-2082731-01f31c423c`, built from
-Thunder Den commit `20827311dfb0bad100095544a309812d5c0e0363`, with SHA-256
+The website image contains runtime source from Thunder Den commit
+`20827311dfb0bad100095544a309812d5c0e0363`, with SHA-256
 `0c22d04d73a2f9c24cd35451bbeb9488c5efc732639b535573039b2d3cae0daf`.
-Chromium checks on this image covered boot, public SeedQR import, keyboard
-capture and reminders, resizing, expanded mode, camera controls and restart
-using synthetic video. These checks do not verify physical devices or a complete
-signing round trip with this new image. Physical two-device acceptance remains
-separate. `setup:site` downloads a release only when its pin includes a public
-download URL. Select published artifacts before deploying beyond local testing.
+Setup downloads the pinned published artifact and checks its full hash, size,
+loading metadata and embedded boot kernel. To reuse an existing copy, run
+`npm run setup:site -- /path/to/thunderden.img`.
+Chromium on Linux checks covered boot, public SeedQR import, keyboard capture and
+reminders, resizing, expanded mode, camera controls, restart and a complete
+mainnet-format signing round trip using public fixtures and synthetic video.
+Physical two-device acceptance remains separate.
 
 Open `http://127.0.0.1:4173/site/`. The compatible emulator files must already be
 installed as described in the development guide. Fonts and QR generation are

@@ -81,16 +81,18 @@ signing round trip over HTTPS using synthetic camera streams. All 150 sampled
 animated QR frames decoded, with 23 distinct payloads. These automated checks do
 not verify physical cameras or mobile browsers.
 
-The deployed preview still uses the unchanged unsigned image from the published
-`v0.0.1-preview.11` release, verified byte-for-byte against the previously tested
-development image. It remains marked `noindex`. Complete the physical
+The website profile pins the unchanged unsigned image from published
+`v0.0.1-preview.12`, SHA-256
+`0c22d04d73a2f9c24cd35451bbeb9488c5efc732639b535573039b2d3cae0daf`.
+The standalone `/demo/` profile remains on Preview 8. Neither image is modified.
+The website remains marked `noindex`. Complete the physical
 laptop/phone checks in [WEBSITE.md](WEBSITE.md#pending-manual-acceptance) and test
 mobile browsers before calling the demo ready. Remove the preview indexing rule
 when launching the production website.
 
-The repository's local test profile can differ from that deployed release; see
-[the local preview pin](WEBSITE.md#local-preview). Select published artifacts
-before deploying a local test profile.
+Run `npm run setup:site` to download and verify the published website pin; see
+[the local preview instructions](WEBSITE.md#local-preview). Rebuild `dist/` before
+every deployment so its image, loaders and emulator match the committed pins.
 
 The custom domain also passed HTTPS, decoded-checksum, caching and shared-memory
 checks after certificate provisioning completed. Chromium checks on that origin
