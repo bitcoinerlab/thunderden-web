@@ -35,6 +35,7 @@ body.website, body.wallet-page {
 .demo-heading h2::before, .demo-heading h2::after { content: ''; flex: 1; border-top: 1px solid #dedfd8; }
 .demo-heading p { margin: 0; color: #686b63; font-size: 13px; line-height: 1.6; }
 .demo-expand-controls { position: absolute; top: -44px; left: 50%; transform: translateX(-50%); width: var(--laptop-width); display: flex; justify-content: flex-end; }
+#demo-warning { position: absolute; left: 10.714286%; top: 2.168675%; transform: translateY(calc(-100% - 2px)); margin: 0; color: #a04742; font-size: 11px; font-weight: 600; line-height: 1.45; letter-spacing: .025em; white-space: nowrap; }
 #expand-demo { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-right: 10.714286%; padding: 9px 12px; border: 1px solid #dedfd8; border-radius: 8px; background: #fff; color: #222320; font-size: 12px; }
 #expand-demo svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 #expand-demo:hover { border-color: #a94f00; }
@@ -108,7 +109,8 @@ body.website, body.wallet-page {
 .website #camera-panel[data-collapsed="true"] { width: auto; }
 .website[data-demo-expanded="true"] { overflow: hidden; }
 .website[data-demo-expanded="true"] .scene { position: fixed; inset: 0; z-index: 5; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 12px; padding: 16px; container-type: normal; background: #191a18; color: #faf9f6; }
-.expanded-controls { flex: 0 0 auto; display: flex; justify-content: flex-end; width: 100%; }
+.expanded-controls { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; }
+.website[data-demo-expanded="true"] #demo-warning { position: static; transform: none; color: #e4a09a; }
 #demo-exit { min-height: 44px; padding: 9px 13px; border: 1px solid #62665d; border-radius: 8px; background: #282b25; color: #faf9f6; font-size: 13px; }
 #demo-exit:hover { border-color: #f7931a; }
 #demo-exit kbd { margin-left: 8px; color: #b5b5ad; font-size: 11px; }

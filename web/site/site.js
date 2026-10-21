@@ -10,6 +10,7 @@ const narrowLayout = matchMedia('(max-width: 767px), (max-width: 999px) and (max
 const scene = document.querySelector('.scene');
 const expandButton = document.querySelector('#expand-demo');
 const exitButton = document.querySelector('#demo-exit');
+const demoWarning = document.querySelector('#demo-warning');
 const background = document.querySelectorAll('.skip-link, .site-header, .site-intro, .demo-heading, .companion-card, #details, .site-footer');
 let pageScroll = 0;
 
@@ -59,6 +60,7 @@ function setExpanded(expanded, restoreFocus = true) {
   document.body.dataset.demoExpanded = String(expanded);
   expandButton.setAttribute('aria-expanded', String(expanded));
   document.querySelector('.expanded-controls').hidden = !expanded;
+  document.querySelector(expanded ? '.expanded-controls' : '#device').prepend(demoWarning);
   for (const element of background) element.inert = expanded;
   if (expanded) {
     scene.setAttribute('role', 'dialog');

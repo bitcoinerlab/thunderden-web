@@ -80,6 +80,13 @@ The same canvas, guest and camera stream remain active. Returning restores the
 page position and focus. Other page controls are inert while expanded. Resizing
 to a product-only narrow layout exits this view and cancels capture normally.
 
+A single "LIVE DEMO: DON'T USE REAL FUNDS" notice sits 2px above the monitor's
+top-left frame, anchored to the laptop artwork as it scales. Use small, legible
+uppercase text in muted red, without a banner or box. Leave clear space below
+the demo subtitle. Move the same notice to the expanded header's left side,
+opposite "Back to website", with enough contrast on its dark background. Keep it
+outside the guest display so it cannot cover menus or QR codes.
+
 Camera controls live in the floating preview. "Hide preview" collapses the video
 to a "Camera on" control with "Show" and "Stop camera" actions; it never removes
 the ability to stop capture. Showing it again reuses the same camera stream.

@@ -44,12 +44,13 @@
         <div class="demo-expand-controls"><button id="expand-demo" type="button" aria-controls="screen-wrapper" aria-expanded="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg>Expand demo</button></div>
         <div class="expanded-controls" hidden><button id="demo-exit" type="button" title="Back to website (F8)" aria-keyshortcuts="F8">Back to website <kbd>F8</kbd></button></div>
         <div id="device">
+          <p id="demo-warning">LIVE DEMO: DON'T USE REAL FUNDS</p>
           <img class="laptop-art" src="./laptop.svg" alt="" aria-hidden="true">
           <img class="device-brand lid-brand" src="./brand/thunderden-horizontal-paper.svg" alt="" aria-hidden="true">
           <img class="device-brand deck-brand" src="./brand/thunderden-horizontal-paper.svg" alt="" aria-hidden="true">
           <span id="camera-led" data-active="false" aria-hidden="true"></span>
           <section id="screen-wrapper" aria-label="Virtual laptop display">
-            <canvas id="screen" width="640" height="400" tabindex="0" inert data-ready="false" data-keyboard="released" aria-label="Thunder Den virtual computer screen" aria-describedby="keyboard-instructions"></canvas>
+            <canvas id="screen" width="640" height="400" tabindex="0" inert data-ready="false" data-keyboard="released" aria-label="Thunder Den virtual computer screen" aria-describedby="keyboard-instructions demo-warning"></canvas>
             <section id="boot-cover" aria-labelledby="boot-title">
               <div class="boot-card">
                 <h2 id="boot-title" role="status">Loading Thunder Den...</h2>

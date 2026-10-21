@@ -42,6 +42,9 @@ with sync_playwright() as pw:
             assert page.locator('.demo-footer, .website .warning, #about').count()==0
             assert page.locator('#device #restart').get_attribute('aria-label')=='Restart demo'
             assert page.locator('#camera-panel #camera').count()==1
+            warning=page.locator('#demo-warning')
+            assert warning.count()==1
+            assert warning.inner_text()=="LIVE DEMO: DON'T USE REAL FUNDS"
             sections=page.locator('.details-grid > article')
             assert sections.locator('h3').all_text_contents()==[
                 'Bring your own laptop','Review the code with AI. Build it yourself.',
@@ -63,6 +66,7 @@ with sync_playwright() as pw:
                 assert page.locator('.demo-stage').is_hidden()
                 assert page.locator('.demo-heading').is_hidden()
                 assert page.locator('#expand-demo').is_hidden()
+                assert warning.is_hidden()
                 assert page.locator('.demo-note').is_hidden()
                 assert page.locator('#device').is_hidden()
                 assert page.locator('.companion-card').is_hidden()
@@ -151,8 +155,19 @@ with sync_playwright() as pw:
             assert state['power']['y']>state['screen']['bottom'],state
             assert state['power']['right']<=state['laptop']['right'],state
             expand=page.locator('#expand-demo').bounding_box()
+            assert page.locator('#device > #demo-warning').is_visible()
+            warning_bounds=warning.bounding_box()
+            subtitle=page.locator('.demo-heading p').bounding_box()
+            assert warning_bounds['y']>=subtitle['y']+subtitle['height']+8,(warning_bounds,subtitle)
+            frame_left=state['laptop']['x']+120/1120*state['laptop']['width']
+            assert abs(warning_bounds['x']-frame_left)<1,(warning_bounds,state)
+            assert warning_bounds['x']+warning_bounds['width']<=expand['x']-12,(warning_bounds,expand)
+            assert warning.evaluate('element=>element.scrollWidth<=element.clientWidth')
+            assert float(warning.evaluate('element=>getComputedStyle(element).fontSize').removesuffix('px'))>=11
+            assert 'demo-warning' in page.locator('#screen').get_attribute('aria-describedby').split()
             frame_right=state['laptop']['x']+1000/1120*state['laptop']['width']
             frame_top=state['laptop']['y']+18/830*state['laptop']['height']
+            assert abs(frame_top-warning_bounds['y']-warning_bounds['height']-2)<.5,(warning_bounds,state)
             assert abs(expand['x']+expand['width']-frame_right)<1,(expand,state)
             assert 8<=frame_top-expand['y']-expand['height']<=24,(expand,state)
             # The visible power face sits inside the deck's right-hand band,
@@ -220,6 +235,12 @@ with sync_playwright() as pw:
                 assert reminder['y']+reminder['height']<=bounds['y']+bounds['height'],(bounds,reminder)
                 page.evaluate("document.querySelector('#keyboard-reminder').hidden=true")
                 exit_bounds=page.locator('#demo-exit').bounding_box()
+                assert page.locator('.expanded-controls #demo-warning').is_visible()
+                assert warning.count()==1
+                warning_bounds=warning.bounding_box()
+                assert warning_bounds['x']>=16 and warning_bounds['x']+warning_bounds['width']<=exit_bounds['x']-12,(warning_bounds,exit_bounds)
+                assert warning_bounds['y']>=exit_bounds['y'] and warning_bounds['y']+warning_bounds['height']<=exit_bounds['y']+exit_bounds['height'],(warning_bounds,exit_bounds)
+                assert warning_bounds['y']+warning_bounds['height']<=bounds['y'],(warning_bounds,bounds)
                 assert bounds['x']>=0 and bounds['x']+bounds['width']<=width
                 assert bounds['y']>=exit_bounds['y']+exit_bounds['height']
                 assert bounds['y']+bounds['height']<=height
@@ -229,6 +250,8 @@ with sync_playwright() as pw:
                 page.locator('#demo-exit').click()
                 assert page.locator('body').get_attribute('data-demo-expanded')=='false'
                 assert page.locator('.laptop-art').is_visible()
+                assert page.locator('#device > #demo-warning').is_visible()
+                assert warning.count()==1
                 assert page.locator('#expand-demo').evaluate('button=>document.activeElement===button')
                 assert not page.locator('.site-header').evaluate('header=>header.inert')
                 assert abs(page.evaluate('scrollY')-before_scroll)<1
@@ -335,4 +358,5 @@ with sync_playwright() as pw:
     print('PASS: image failures retain in-screen diagnostics and recovery without a permanent About button')
     print('PASS: dismissible keyboard reminder fits normal and expanded displays and respects reduced motion')
     print('PASS: four renumbered details blocks retain the USB/RAM explanation beside the security guide, stacking on phones')
+    print('PASS: a single demo-funds warning aligns with the monitor, stays clear of controls and remains visible in expanded mode')
     browser.close()
