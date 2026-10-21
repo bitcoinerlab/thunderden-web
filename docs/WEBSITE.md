@@ -30,6 +30,10 @@ This is one scrolling home page, not a fixed-height hero or an attempt to fit
 every explanation into one viewport. Cap the laptop's size and let the product
 details follow naturally, visible alongside it on taller screens. Keep the
 simulator readable rather than making it tiny to preserve the side panel.
+Roomy desktop layouts use a laptop cap of 980px, giving the usable display about
+10-15% more space without enlarging the companion card. Short windows and stacked
+tablet layouts keep their previous sizing. The decorative deck and product
+details may follow below the fold rather than shrinking the guest display.
 Keep the full demo on usable computer and tablet layouts, including compact
 laptop viewports such as 1024x600 and 1280x720. Below 1000px wide, the laptop
 appears first with the companion card below it. Every visible demo starts

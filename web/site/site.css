@@ -62,7 +62,7 @@ body.website, body.wallet-page {
 .qr-code { display: block; width: 144px; max-width: 100%; background: #fff; }
 .qr-code svg { display: block; width: 100%; height: auto; shape-rendering: crispEdges; }
 .companion-card .card-note { margin: 10px 0 0 !important; font-size: 10px; color: #686b63; text-align: center; }
-.website .scene { --laptop-width: min(860px,100%,calc(max(520px,100svh - 220px) * 1120 / 830)); position: relative; height: auto; container-type: inline-size; gap: 8px; align-self: start; }
+.website .scene { --laptop-width: min(980px,100%,calc(max(520px,100svh - 140px) * 1120 / 830)); position: relative; height: auto; container-type: inline-size; gap: 8px; align-self: start; }
 .website #device { width: var(--laptop-width); aspect-ratio: 1120 / 830; border: 0; border-radius: 0; box-shadow: none; }
 .website .laptop-art, .website .device-brand, .website #camera-led { display: block; }
 .website #screen-wrapper { left: 13.214286%; top: 5.903614%; width: 73.571429%; height: 62.048193%; }

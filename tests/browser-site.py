@@ -161,6 +161,12 @@ with sync_playwright() as pw:
                 box=state[name]
                 assert box['width'] > 0 and box['height'] > 0 and box['x'] >= 0 and box['right'] <= width+1, (name,state)
             assert state['laptop']['y'] >= state['intro']['bottom'], state
+            if width>=1200 and height>=700:
+                previous_width=min(860,state['stage']['width']-244,max(520,height-220)*1120/830)
+                assert state['laptop']['width']>=previous_width*1.1,state
+                assert state['screen']['bottom']<=height-16,state
+            if width>=1200 and height<=640:
+                assert abs(state['laptop']['width']-520*1120/830)<1,state
             assert state['note']['y'] >= state['laptop']['bottom'], state
             assert state['details']['y'] >= state['stage']['bottom'], state
             assert state['details']['y']-state['stage']['bottom'] <= 40, state
@@ -203,7 +209,8 @@ with sync_playwright() as pw:
                 }
                 return gaps.map(gap=>gap*laptop.width/1120);
             }""")
-            assert min(margins)>0 and max(margins)-min(margins)<2,margins
+            clearance_tolerance=3 if state['laptop']['width']>860 else 2
+            assert min(margins)>0 and max(margins)-min(margins)<clearance_tolerance,margins
             if not touch and width==1366:
                 page.locator('#restart').hover()
                 assert page.locator('#power-label').is_visible()
@@ -217,8 +224,9 @@ with sync_playwright() as pw:
                     assert box['x'] >= 0 and box['right'] <= width+1 and box['y'] >= 0 and box['bottom'] <= height+1, (name,state)
                 assert state['card']['right'] < state['laptop']['x'], state
             if width>=1000 and height>=1000:
-                assert page.locator('#details-title').bounding_box()['y']<height-50,state
-                assert state['firstScreen']['height']<height-100,state
+                assert state['firstScreen']['height']<height,state
+                if height>=1200:
+                    assert page.locator('#details-title').bounding_box()['y']<height-50,state
             if width >= 1000:
                 assert state['card']['right'] < state['laptop']['x'], state
             else:
