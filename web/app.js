@@ -61,6 +61,7 @@ function startGuestBoot() {
     bootProgressBar.setAttribute('aria-valuetext', `${description} · ${Math.floor(seconds)} s elapsed`);
     if (value === undefined) bootProgressBar.removeAttribute('value');
     else bootProgressBar.value = value;
+    if (websiteDemo) bootProgress.style.setProperty('--startup-progress', `${(value ?? 0) * 100}%`);
   };
   document.querySelector('#boot-title').textContent = 'Booting Thunder Den…';
   document.querySelector('#boot-message').textContent = websiteDemo
@@ -80,6 +81,7 @@ function finishGuestBoot(detected) {
   if (detected) {
     bootProgressBar.value = 1;
     bootProgressBar.setAttribute('aria-valuetext', 'Thunder Den is ready');
+    if (websiteDemo) bootProgress.style.setProperty('--startup-progress', '100%');
   }
   bootCover.hidden = true;
   bootControls.hidden = true;
@@ -113,7 +115,12 @@ function stage(name, detail, value, done = value === 1) {
   const elapsed = (performance.now() - Number(row.dataset.started)) / 1000;
   const duration = elapsed < 1 ? `${Math.round(elapsed * 1000)} ms` : `${elapsed.toFixed(1)} s`;
   const message = detail + (done ? ` · ${duration}` : '');
-  if (name === 'image') {
+  if (websiteDemo) {
+    row.style.setProperty('--startup-progress', `${progress.value * 100}%`);
+    row.querySelector('small').textContent = done ? '✓ Ready' : value === 0 ? 'Connecting…'
+      : value === undefined ? detail : `${Math.floor(value * 100)}%`;
+    progress.setAttribute('aria-valuetext', message);
+  } else if (name === 'image') {
     row.querySelector('small').textContent = done ? '100%' : value === undefined ? '' : `${Math.floor(value * 100)}%`;
     progress.setAttribute('aria-valuetext', message);
   } else row.querySelector('small').textContent = message;

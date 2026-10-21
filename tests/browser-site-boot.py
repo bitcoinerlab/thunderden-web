@@ -49,6 +49,21 @@ with sync_playwright() as pw:
         const capture=navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
         window.cameraCalls=0;
         navigator.mediaDevices.getUserMedia=options=>{cameraCalls++;return capture(options);};
+        window.loadingSamples=[];
+        document.addEventListener('DOMContentLoaded',()=>{
+            const startup=document.querySelector('#startup');
+            const observer=new MutationObserver(()=>{
+                for (const row of startup.querySelectorAll('li')) {
+                    const progress=row.querySelector('progress');
+                    loadingSamples.push({id:row.id,state:row.dataset.state,value:progress.value,
+                        determinate:progress.hasAttribute('value'),
+                        fill:parseFloat(row.style.getPropertyValue('--startup-progress')),
+                        text:row.querySelector('small').textContent});
+                }
+                if (startup.hidden) observer.disconnect();
+            });
+            observer.observe(startup,{attributes:true,childList:true,subtree:true,characterData:true});
+        });
     })();""")
 
     def wait_guest(label):
@@ -73,6 +88,17 @@ with sync_playwright() as pw:
         assert page.locator('#screen').evaluate('screen=>[screen.width,screen.height]')==[640,400]
         assert page.locator('#screen').evaluate("screen=>getComputedStyle(screen).imageRendering")=='pixelated'
         assert page.locator('#keyboard-prompt').is_visible()
+        assert page.locator('#startup li small').all_text_contents()==['✓ Ready','✓ Ready']
+        assert page.locator('#startup [data-state="done"]').count()==2
+        samples=page.evaluate('loadingSamples')
+        assert samples and any(0<sample['value']<1 for sample in samples)
+        for sample in samples:
+            assert abs(sample['fill']-sample['value']*100)<.00001,sample
+            if sample['id']=='startup-image': assert sample['determinate'],sample
+            if sample['text'].endswith('%'):
+                assert int(sample['text'][:-1])==int(sample['value']*100),sample
+        assert page.locator('#boot-progress-bar').evaluate('bar=>getComputedStyle(bar).height')=='14px'
+        assert page.locator('#keyboard-reminder').is_hidden()
         assert 'wallet' not in page.locator('#keyboard-guide').inner_text().lower()
         assert page.evaluate('cameraCalls')==0
         page.screenshot(path=str(out/'website-ready.png'))
@@ -94,14 +120,57 @@ with sync_playwright() as pw:
         page.keyboard.press('Enter')
         assert page.locator('#keyboard-prompt').is_hidden()
         assert page.evaluate('siteInput.length')==0,'Activation key reached the guest'
+        reminder=page.locator('#keyboard-reminder')
+        assert reminder.is_hidden(),'Activating the screen must not show the reminder'
+        page.locator('#screen').click()
+        assert reminder.is_visible()
+        assert reminder.get_attribute('role')=='status'
+        assert page.locator('#screen').evaluate('screen=>document.activeElement===screen')
+        assert page.evaluate('siteInput.length')==0,'Mouse clicks must not inject guest input'
+        assert page.evaluate("siteQmp.command('query-status').then(status=>status.running)"),'Reminder paused the guest'
+        page.wait_for_timeout(200)
+        page.screenshot(path=str(out/'keyboard-reminder.png'))
+        page.wait_for_timeout(1400)
+        page.locator('#screen').click(position={'x':20,'y':20})
+        assert reminder.evaluate('element=>getComputedStyle(element).opacity')=='1','Repeat click made the reminder blink'
+        page.wait_for_timeout(1800)
+        assert reminder.is_visible(),'Repeat screen clicks must renew the timeout'
+        assert reminder.evaluate('element=>getComputedStyle(element).opacity')=='1','Reminder faded relative to the first click'
+        page.wait_for_function("document.querySelector('#keyboard-reminder').hidden",timeout=2000)
+        page.locator('#screen').click()
+        assert reminder.is_visible(),'A click after timeout must show the reminder immediately'
+        reminder.get_by_role('button',name='Dismiss keyboard reminder').click()
+        assert reminder.is_hidden(),'Clicking the reminder must close it without reopening it'
+        assert page.locator('#screen').evaluate('screen=>document.activeElement===screen'),'Dismissing the reminder stole keyboard focus'
+        assert page.locator('#screen').get_attribute('data-keyboard')=='active'
+        assert page.evaluate('siteInput.length')==0,'Reminder dismissal injected guest input'
+        page.locator('#screen').click()
+        assert reminder.is_visible(),'A screen click after dismissal must show the reminder immediately'
+        page.keyboard.press('ArrowDown')
+        assert reminder.is_hidden(),'Guest keyboard input must immediately dismiss the reminder'
+        page.wait_for_function('siteInput.some(event=>event.data.key.data==="down" && event.data.down)')
+        page.locator('#screen').click()
+        assert reminder.is_visible(),'A screen click after a key must show the reminder immediately'
         page.keyboard.press('1')
         wait_guest('Start a session')
         page.locator('#expand-demo').click()
         assert page.locator('body').get_attribute('data-demo-expanded')=='true'
         assert page.locator('#screen').get_attribute('data-ready')=='true'
         page.locator('#screen').click()
+        assert reminder.is_hidden(),'A click to recapture keyboard control must not show the reminder'
+        page.locator('#screen').click()
+        assert reminder.is_visible(),'Reminder must work in the expanded display'
+        page.wait_for_timeout(200)
+        page.screenshot(path=str(out/'keyboard-reminder-expanded.png'))
         first_input=page.evaluate('siteInput.length')
+        reminder.get_by_role('button',name='Dismiss keyboard reminder').click()
+        assert reminder.is_hidden()
+        assert page.locator('#screen').evaluate('screen=>document.activeElement===screen')
+        assert page.evaluate('siteInput.length')==first_input
+        page.locator('#screen').click()
+        assert reminder.is_visible()
         page.keyboard.press('Escape')
+        assert reminder.is_hidden()
         page.wait_for_function('index=>siteInput.slice(index).some(event=>event.data.key.data==="esc" && event.data.down)',arg=first_input)
         assert page.locator('body').get_attribute('data-demo-expanded')=='true'
         # F8 must exit even while the guest owns Tab and Esc.
@@ -149,6 +218,7 @@ with sync_playwright() as pw:
         page.locator('#camera').click()
         page.wait_for_function("document.querySelector('#camera-led').dataset.active==='false'")
         assert page.locator('#camera-panel').is_hidden()
+        assert page.locator('#keyboard-reminder').is_hidden()
         assert page.evaluate("stoppedCameraTracks.every(track=>track.readyState==='ended')")
         assert page.evaluate("document.querySelector('#camera-video').srcObject===null")
         # Reopen capture explicitly to check that hiding the entire demo also
@@ -202,9 +272,19 @@ with sync_playwright() as pw:
         assert page.evaluate('cameraCalls')==0
         wait_guest('Choose a Bitcoin network')
         page.screenshot(path=str(out/'restarted.png'))
+        page.locator('#keyboard-prompt').click()
+        assert reminder.is_hidden(),'Initial mouse activation must not show the reminder'
+        page.locator('#screen').click()
+        assert reminder.is_visible()
+        page.locator('#intro-title').click()
+        assert reminder.is_hidden(),'Clicking outside must immediately dismiss the reminder'
         assert not errors,errors
         (out/'checks.json').write_text(json.dumps({'display':[640,400],'pixelated':True,
             'laptop_geometry_stable':True,'activation_key_isolated':True,'companion_seedqr_decoded':True,
+            'keyboard_reminder_does_not_inject_or_pause':True,'keyboard_reminder_timeout_renews':True,
+            'keyboard_reminder_click_dismissal_preserves_focus':True,'keyboard_reminder_no_cooldown':True,
+            'keyboard_reminder_clears_on_guest_key':True,
+            'keyboard_reminder_expanded_and_blur':True,
             'rendered_paper_seedqr_decoded':True,
             'narrow_layout_stops_camera':True,
             'preview_collapses_without_stopping':True,'stop_available_when_collapsed':True,
@@ -220,6 +300,7 @@ with sync_playwright() as pw:
         print('PASS: preview collapses without stopping capture; Show reuses it and Stop releases all tracks')
         print('PASS: laptop power button stops capture and restarts to the real network menu without confirmation')
         print('PASS: expanding preserves the guest/camera; Esc reaches Thunder Den and F8 exits without leaking a guest key')
+        print('PASS: screen clicks renew the keyboard reminder without blinking; no cooldown, and clicking the reminder closes it without losing keyboard focus')
     except Exception:
         page.screenshot(path=str(out/'failure.png'))
         print(json.dumps({'status':page.locator('#status').inner_text(),

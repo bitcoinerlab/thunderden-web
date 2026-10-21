@@ -199,6 +199,12 @@ with sync_playwright() as pw:
                 assert page.locator('#screen').evaluate('screen=>[screen.width,screen.height]')==[640,400]
                 assert len(pending)==before_downloads,'Expanding must not boot or restart the guest'
                 bounds=page.locator('#screen-wrapper').bounding_box()
+                page.evaluate("document.querySelector('#keyboard-reminder').hidden=false")
+                reminder=page.locator('#keyboard-reminder').bounding_box()
+                assert reminder['x']>=bounds['x'] and reminder['y']>=bounds['y'],(bounds,reminder)
+                assert reminder['x']+reminder['width']<=bounds['x']+bounds['width'],(bounds,reminder)
+                assert reminder['y']+reminder['height']<=bounds['y']+bounds['height'],(bounds,reminder)
+                page.evaluate("document.querySelector('#keyboard-reminder').hidden=true")
                 exit_bounds=page.locator('#demo-exit').bounding_box()
                 assert bounds['x']>=0 and bounds['x']+bounds['width']<=width
                 assert bounds['y']>=exit_bounds['y']+exit_bounds['height']
@@ -220,6 +226,7 @@ with sync_playwright() as pw:
             if touch and width == 768:
                 page.locator('#expand-demo').click()
                 page.set_viewport_size({'width':390,'height':844})
+                page.wait_for_function("document.body.dataset.demoExpanded==='false'")
                 assert page.locator('#device').is_hidden()
                 assert page.locator('#phone-demo').is_visible()
                 assert page.locator('body').get_attribute('data-demo-state') == 'running'
@@ -240,7 +247,20 @@ with sync_playwright() as pw:
                 assert guide['x']+guide['width']<=screen['x']+screen['width'],(screen,guide)
                 assert guide['y']+guide['height']<=screen['y']+screen['height'],(screen,guide)
                 page.screenshot(path=str(out/f'ready-{width}x{height}.png'))
-                page.evaluate("document.querySelector('#boot-cover').hidden=false; document.querySelector('#keyboard-prompt').hidden=true")
+                page.evaluate("document.querySelector('#keyboard-prompt').hidden=true; document.querySelector('#keyboard-reminder').hidden=false")
+                reminder=page.locator('#keyboard-reminder').bounding_box()
+                assert reminder['x']>=screen['x'] and reminder['y']>=screen['y'],(screen,reminder)
+                assert reminder['x']+reminder['width']<=screen['x']+screen['width'],(screen,reminder)
+                assert reminder['y']+reminder['height']<=screen['y']+screen['height'],(screen,reminder)
+                assert page.locator('#keyboard-reminder').get_by_role('button',name='Dismiss keyboard reminder').count()==1
+                assert page.locator('#keyboard-reminder').evaluate('element=>element.scrollWidth<=element.clientWidth')
+                page.wait_for_timeout(200)
+                page.screenshot(path=str(out/f'keyboard-reminder-{width}x{height}.png'))
+                page.emulate_media(reduced_motion='reduce')
+                assert page.locator('#keyboard-reminder').evaluate('element=>element.getAnimations().length')==0
+                assert page.locator('#keyboard-reminder').evaluate('element=>getComputedStyle(element).transitionDuration')=='0s'
+                page.emulate_media(reduced_motion='no-preference')
+                page.evaluate("document.querySelector('#boot-cover').hidden=false; document.querySelector('#keyboard-reminder').hidden=true")
             if not touch and width == 1366:
                 page.locator('.site-header nav a').filter(has_text='How it works').click()
                 page.wait_for_function('window.scrollY > 100')
@@ -299,4 +319,5 @@ with sync_playwright() as pw:
     print('PASS: natural page flow reveals details on tall screens; power button replaces the demo toolbar')
     print('PASS: expanded display fits laptop/tablet layouts; Back/F8 exits, Esc does not and no guest is restarted')
     print('PASS: image failures retain in-screen diagnostics and recovery without a permanent About button')
+    print('PASS: dismissible keyboard reminder fits normal and expanded displays and respects reduced motion')
     browser.close()

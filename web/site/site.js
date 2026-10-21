@@ -13,6 +13,44 @@ const exitButton = document.querySelector('#demo-exit');
 const background = document.querySelectorAll('.skip-link, .site-header, .site-intro, .demo-heading, .companion-card, #details, .site-footer');
 let pageScroll = 0;
 
+const screen = document.querySelector('#screen');
+const keyboardReminder = document.querySelector('#keyboard-reminder');
+let reminderTimer;
+
+function hideKeyboardReminder() {
+  clearTimeout(reminderTimer);
+  keyboardReminder.hidden = true;
+}
+screen.addEventListener('pointerdown', event => {
+  // A click that captures the keyboard is expected. Further clicks may mean the
+  // user is trying to select a guest menu with the mouse.
+  if (event.button !== 0 || !event.isPrimary || screen.inert || screen.dataset.ready !== 'true'
+    || screen.dataset.keyboard !== 'active' || !document.hasFocus()) return;
+  clearTimeout(reminderTimer);
+  keyboardReminder.hidden = false;
+  keyboardReminder.dataset.fading = 'false';
+  reminderTimer = setTimeout(() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) hideKeyboardReminder();
+    else {
+      keyboardReminder.dataset.fading = 'true';
+      reminderTimer = setTimeout(hideKeyboardReminder, 160);
+    }
+  }, 3000);
+});
+keyboardReminder.addEventListener('pointerdown', event => {
+  // Keep keyboard capture when dismissing the notice with the mouse.
+  event.preventDefault();
+  event.stopPropagation();
+});
+keyboardReminder.addEventListener('click', event => {
+  event.stopPropagation();
+  hideKeyboardReminder();
+});
+screen.addEventListener('keydown', hideKeyboardReminder);
+screen.addEventListener('blur', hideKeyboardReminder);
+window.addEventListener('blur', hideKeyboardReminder);
+window.addEventListener('thunderden-demo-hidden', hideKeyboardReminder);
+
 function setExpanded(expanded, restoreFocus = true) {
   if (expanded && narrowLayout.matches) return;
   if (expanded === (document.body.dataset.demoExpanded === 'true')) return;
