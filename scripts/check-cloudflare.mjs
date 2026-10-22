@@ -25,6 +25,11 @@ for (const [path, marker] of [['/', 'data-demo="website"'], ['/wallet-mockup/', 
   const response = await request(path);
   assert.equal(response.status, 200, path);
   isolated(response);
+  if (origin.hostname === 'thunderden.com' && path === '/') {
+    assert.doesNotMatch(response.headers.get('X-Robots-Tag') || '', /\b(?:noindex|none)\b/i,
+      'The public website must allow search indexing.');
+    console.log('Public website allows search indexing.');
+  }
   assert.ok((await response.text()).includes(marker), path);
   console.log('Page and shared-memory headers:', path);
 }

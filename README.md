@@ -118,7 +118,7 @@ Preview 8 demo at `/demo/`. For the local website profile, run `npm run setup:si
 to download the separately pinned, unchanged **Preview 12** image, then open
 **http://127.0.0.1:4173/site/** after `npm start`. The original local demo stays at
 `/`. See [the website notes](docs/WEBSITE.md) for the companion's current scope
-and pending physical-device checks.
+and device/browser verification scope.
 
 Install the pinned development dependencies to run all JavaScript unit tests:
 

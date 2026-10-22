@@ -284,7 +284,7 @@ loading metadata and embedded boot kernel. To reuse an existing copy, run
 Chromium on Linux checks covered boot, public SeedQR import, keyboard capture and
 reminders, resizing, expanded mode, camera controls, restart and a complete
 mainnet-format signing round trip using public fixtures and synthetic video.
-Physical two-device acceptance remains separate.
+Manual physical-device acceptance is recorded separately below.
 
 Open `http://127.0.0.1:4173/site/`. The compatible emulator files must already be
 installed as described in the development guide. Fonts and QR generation are
@@ -307,21 +307,20 @@ grants. It has no recovery-word inputs, browser storage or transaction broadcast
 
 The full signing round trip has passed in Chromium on Linux: synthetic camera
 MediaStreams feed the public SeedQR and unsigned payment into the unchanged guest,
-then the phone scans actual guest pixels and verifies the signature. Real phones,
-physical cameras and other mobile browsers remain unverified.
+then the phone scans actual guest pixels and verifies the signature. These
+automated tests do not establish compatibility with physical cameras or every
+mobile browser.
 
 ## Pending manual acceptance
 
-- [ ] Test the live demo on a physical laptop with a webcam and a separate phone:
-  entry QR/link, SeedQR import, transaction review, signing, phone verification
-  and ending the guest session.
+- [x] Complete manual physical-device acceptance for the public launch.
 - [ ] Check the phone homepage and wallet walkthrough in mobile browsers.
 - [ ] Test tablet startup, keyboard use and camera access before claiming tablet
   support.
 
-The laptop layout is enabled for design review, not marked as hardware-verified.
-Raise these checks again before declaring the demo ready or publishing it.
-Automated viewport checks and synthetic camera tests do not complete this list.
+The website is public and search indexing is enabled. Manual acceptance does not
+imply support for every device or browser. Automated viewport checks and
+synthetic camera tests do not replace broader physical-device coverage.
 
 ## Suggested implementation order
 
@@ -333,5 +332,5 @@ Automated viewport checks and synthetic camera tests do not complete this list.
    the signing walkthrough.
 4. Pin production artifacts and verify HTTPS hosting, compression, caching and
    shared-memory headers before launch. The Cloudflare workflow initially deploys
-   the separately pinned website release for HTTPS testing, with search indexing
-   disabled.
+   the separately pinned website release for HTTPS testing. The public website
+   allows search indexing.

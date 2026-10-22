@@ -1,4 +1,4 @@
-# Cloudflare HTTPS preview
+# Cloudflare HTTPS hosting
 
 The preview uses Workers Static Assets and a small Worker for two disk images and
 the Wasm binary. Each uploaded file must be below 25 MiB. The build stores gzip
@@ -85,10 +85,11 @@ The website profile pins the unchanged unsigned image from published
 `v0.0.1-preview.12`, SHA-256
 `0c22d04d73a2f9c24cd35451bbeb9488c5efc732639b535573039b2d3cae0daf`.
 The standalone `/demo/` profile remains on Preview 8. Neither image is modified.
-The website remains marked `noindex`. Complete the physical
-laptop/phone checks in [WEBSITE.md](WEBSITE.md#pending-manual-acceptance) and test
-mobile browsers before calling the demo ready. Remove the preview indexing rule
-when launching the production website.
+The public website allows search indexing; its responses do not set `noindex`.
+Manual physical-device acceptance is complete for the public launch. This does
+not establish universal browser or hardware compatibility; see the remaining
+coverage checks in [WEBSITE.md](WEBSITE.md#pending-manual-acceptance). A preview
+label on a software release does not make the deployed website private.
 
 Run `npm run setup:site` to download and verify the published website pin; see
 [the local preview instructions](WEBSITE.md#local-preview). Rebuild `dist/` before
