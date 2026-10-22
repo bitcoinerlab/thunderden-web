@@ -23,6 +23,7 @@ def check_notice_close(page,selector):
     close=notice.locator('.notice-close')
     assert close.count()==1 and close.inner_text()=='×'
     assert close.get_attribute('aria-hidden')=='true'
+    assert close.evaluate('element=>getComputedStyle(element).color')=='rgb(247, 147, 26)'
     card=notice.bounding_box()
     bounds=close.bounding_box()
     label=notice.locator(':scope > strong').bounding_box()
@@ -142,6 +143,10 @@ with sync_playwright() as pw:
             assert illustration.is_visible()
             assert illustration.locator('img').evaluate('image=>image.complete && image.naturalWidth>0')
             assert illustration.locator('figcaption').all_text_contents()==['Demo walletThunder Den']
+            image=illustration.locator('img').bounding_box()
+            for label,center in zip(illustration.locator('figcaption span').all(),[35/200,145/200]):
+                caption=label.bounding_box()
+                assert abs(caption['x']+caption['width']/2-image['x']-image['width']*center)<.5,(image,caption,center)
             assert illustration.bounding_box()['y']>=page.locator('#companion-title').bounding_box()['y']
             assert illustration.bounding_box()['y']+illustration.bounding_box()['height']<=page.locator('#companion-qr').bounding_box()['y']
             assert page.locator('#device').bounding_box()['width'] > 0
@@ -191,6 +196,28 @@ with sync_playwright() as pw:
             assert state['power']['y']>state['screen']['bottom'],state
             assert state['power']['right']<=state['laptop']['right'],state
             expand=page.locator('#expand-demo').bounding_box()
+            assert expand['height']>=44
+            assert page.locator('#expand-demo').evaluate('button=>getComputedStyle(button).fontSize')=='13px'
+            assert page.locator('#expand-demo svg').bounding_box()['width']==18
+            if not touch and width==1366:
+                for mode in ['normal','hover','focus']:
+                    if mode=='hover': page.locator('#expand-demo').hover()
+                    if mode=='focus':
+                        page.mouse.move(0,0)
+                        page.locator('#companion-link').focus()
+                        page.keyboard.press('Tab')
+                        assert page.locator('#expand-demo').evaluate('button=>button.matches(":focus-visible")')
+                    style=page.locator('#expand-demo').evaluate('''button=>{
+                        const style=getComputedStyle(button);
+                        return {font:style.fontFamily,border:style.borderTopColor,text:style.color,
+                            icon:getComputedStyle(button.querySelector('svg')).color,
+                            background:style.backgroundColor,shadow:style.boxShadow};
+                    }''')
+                    assert style.pop('font').startswith('Inter'),style
+                    assert style=={'border':'rgb(222, 223, 216)' if mode=='normal' else 'rgb(247, 147, 26)',
+                        'text':'rgb(34, 35, 32)','icon':'rgb(34, 35, 32)' if mode=='normal' else 'rgb(247, 147, 26)',
+                        'background':'rgb(255, 255, 255)','shadow':'none'},(mode,style)
+                    page.screenshot(path=str(out/f'expand-button-{mode}.png'))
             assert page.locator('#device > #demo-warning').is_visible()
             warning_bounds=warning.bounding_box()
             subtitle=page.locator('.demo-heading p').bounding_box()
@@ -329,9 +356,18 @@ with sync_playwright() as pw:
                 assert page.locator('#keyboard-wallet-hint').count()==0
                 assert 'wallet' not in page.locator('#keyboard-guide').inner_text().lower()
                 assert page.locator('.keyboard-ready').count()==0
-                assert page.locator('#keyboard-instructions').inner_text()=='Click the screen to control Thunder Den'
-                assert page.locator('#keyboard-release').inner_text()=='Click outside the screen to use your keyboard normally again.'
-                assert page.locator('#keyboard-prompt').get_attribute('aria-label')=='Click the screen to control Thunder Den'
+                assert page.locator('#keyboard-instructions').inner_text()=='Click the screen to enable keyboard control'
+                assert page.locator('#keyboard-navigation').inner_text()=='Use your keyboard, not the mouse.'
+                assert page.locator('#keyboard-release').inner_text()=='Click outside the screen to release your keyboard.'
+                assert page.locator('#keyboard-prompt').get_attribute('aria-label')=='Click the screen to enable keyboard control'
+                for selector in ['#keyboard-prompt','#screen']:
+                    assert 'keyboard-navigation' in page.locator(selector).get_attribute('aria-describedby').split()
+                assert page.locator('#keyboard-guide kbd, #keyboard-reminder kbd').evaluate_all('''keys=>
+                    keys.length===7 && keys.every(key=>getComputedStyle(key).color==='rgb(247, 147, 26)')''')
+                assert page.locator('#keyboard-navigation, #keyboard-shortcuts, #keyboard-release, #keyboard-reminder > span').evaluate_all('''elements=>elements.every(element=>{
+                    const style=getComputedStyle(element);
+                    return style.color==='rgb(210, 213, 201)' && style.fontSize==='16px';
+                })''')
                 assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backdropFilter')=='blur(1px)'
                 assert page.locator('#keyboard-prompt').evaluate('element=>getComputedStyle(element).backgroundColor')=='rgba(0, 0, 0, 0.1)'
                 assert 'monospace' in page.locator('#keyboard-guide').evaluate('element=>getComputedStyle(element).fontFamily')
@@ -354,10 +390,14 @@ with sync_playwright() as pw:
                 title=page.locator('#keyboard-instructions')
                 assert title.bounding_box()['height']<=title.evaluate('element=>parseFloat(getComputedStyle(element).lineHeight)')+.5
                 assert page.locator('#keyboard-shortcuts').evaluate('element=>getComputedStyle(element).fontSize')=='16px'
+                navigation=page.locator('#keyboard-navigation').bounding_box()
+                shortcuts=page.locator('#keyboard-shortcuts').bounding_box()
+                assert title.bounding_box()['y']+title.bounding_box()['height']<=navigation['y']
+                assert navigation['y']+navigation['height']<=shortcuts['y']
                 release=page.locator('#keyboard-release')
                 assert release.evaluate('element=>getComputedStyle(element).fontSize')=='16px'
                 line_height=release.evaluate('element=>parseFloat(getComputedStyle(element).lineHeight)')
-                assert line_height<release.bounding_box()['height']<=line_height*2+.5
+                assert line_height-.5<=release.bounding_box()['height']<=line_height*2+.5
                 assert guide['x']>=screen['x'] and guide['y']>=screen['y'],(screen,guide)
                 assert guide['x']+guide['width']<=screen['x']+screen['width'],(screen,guide)
                 assert guide['y']+guide['height']<=screen['y']+screen['height'],(screen,guide)

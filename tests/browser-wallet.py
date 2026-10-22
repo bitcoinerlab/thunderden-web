@@ -129,9 +129,10 @@ with sync_playwright() as pw:
         if args.expanded:
             page.locator('#expand-demo').click()
             assert page.locator('body').get_attribute('data-demo-expanded')=='true'
+            assert page.locator('#screen').evaluate('screen=>document.activeElement===screen')
         page.evaluate('setCameraQr',{'texts':[seed],'size':seed_size})
         assert page.evaluate('cameraCalls')==0
-        page.locator('#keyboard-prompt').click()
+        if not args.expanded: page.locator('#keyboard-prompt').click()
         page.keyboard.press('1')
         wait_guest('Start a session')
         page.keyboard.press('1')

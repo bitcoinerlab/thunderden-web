@@ -43,9 +43,10 @@ body.website, body.wallet-page {
 .demo-heading p { margin: 0; color: #686b63; font-size: 13px; line-height: 1.6; }
 .demo-expand-controls { position: absolute; top: -44px; left: 50%; transform: translateX(-50%); width: var(--laptop-width); display: flex; justify-content: flex-end; }
 #demo-warning { position: absolute; left: 10.714286%; top: 2.168675%; transform: translateY(calc(-100% - 2px)); margin: 0; color: #a04742; font-size: 11px; font-weight: 600; line-height: 1.45; letter-spacing: .025em; white-space: nowrap; }
-#expand-demo { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-right: 10.714286%; padding: 9px 12px; border: 1px solid #dedfd8; border-radius: 8px; background: #fff; color: #222320; font-size: 12px; }
+#expand-demo { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-right: 10.714286%; padding: 9px 12px; border: 1px solid #dedfd8; border-radius: 8px; background: #fff; color: #222320; font-size: 13px; }
 #expand-demo svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-#expand-demo:hover { border-color: #a94f00; }
+#expand-demo:is(:hover,:focus-visible) { border-color: #f7931a; }
+#expand-demo:is(:hover,:focus-visible) svg { color: #f7931a; }
 .demo-stage { min-height: 0; display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 24px; align-items: center; }
 .companion-card { align-self: start; margin-top: 12px; padding: 18px; border: 1px solid #dedfd8; border-radius: 12px; background: #fff; font-size: 12px; line-height: 1.55; }
 .eyebrow { margin: 0 0 10px; font-size: 10px; line-height: 1.4; font-weight: 600; letter-spacing: .12em; color: #686b63; }
@@ -54,7 +55,7 @@ body.website, body.wallet-page {
 .companion-card strong { font-weight: 600; }
 .companion-illustration { margin: 0 0 8px; }
 .companion-illustration img { display: block; width: 100%; height: auto; }
-.companion-illustration figcaption { display: grid; grid-template-columns: 35% 65%; margin-top: 2px; text-align: center; font-size: 10px; line-height: 12px; color: #686b63; }
+.companion-illustration figcaption { display: grid; grid-template-columns: 35% 55%; column-gap: 10%; margin-top: 2px; text-align: center; font-size: 10px; line-height: 12px; color: #686b63; }
 .companion-link { display: block; font-size: 11px; font-weight: 500; overflow-wrap: anywhere; }
 .companion-address { margin-top: 8px; text-align: center; }
 .companion-address p { margin: 0 0 4px; font-size: 11px; color: #686b63; }
@@ -98,17 +99,19 @@ body.website, body.wallet-page {
 .website #screen-wrapper:has(#keyboard-reminder:not([hidden]))::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .website #keyboard-guide, #keyboard-reminder, .website .camera-card, .website #about-dialog { padding: 8px 34px; border: 1px solid #f7931a; border-radius: 2px; background: #2b2e26; color: #faf9f6; box-shadow: 0 3px 0 #0009, 0 8px 20px #0006; text-align: center; }
 .website #keyboard-guide { position: relative; width: max-content; max-width: min(440px,100%); padding-inline: 14px; }
-.notice-close { position: absolute; top: 2px; right: 2px; display: grid; place-items: center; width: 28px; height: 28px; color: #faf9f6; font-size: 20px; line-height: 1; }
+.notice-close { position: absolute; top: 2px; right: 2px; display: grid; place-items: center; width: 28px; height: 28px; color: #f7931a; font-size: 20px; line-height: 1; }
 .website #keyboard-instructions, #keyboard-reminder strong, .website .camera-card h2, .website #about-title { color: #faf9f6; font-size: 18px; font-weight: 400; line-height: 1.5; }
 .website #keyboard-instructions::before, #keyboard-reminder strong::before, .website .camera-card h2::before, .website #about-title::before { content: '[ '; color: #f7931a; }
 .website #keyboard-instructions::after, #keyboard-reminder strong::after, .website .camera-card h2::after, .website #about-title::after { content: ' ]'; color: #f7931a; }
+.website #keyboard-instructions::before { content: '['; margin-right: 2px; }
+.website #keyboard-instructions::after { content: ']'; margin-left: 2px; }
 .website #keyboard-instructions strong { font-weight: 400; }
-.website .guide-keys, .website .keyboard-release, #keyboard-reminder > span { display: block; margin-top: 5px; color: #d2d5c9; font-size: 16px; line-height: 1.4; }
+.website .keyboard-navigation, .website .guide-keys, .website .keyboard-release, #keyboard-reminder > span { display: block; margin-top: 5px; color: #d2d5c9; font-size: 16px; line-height: 1.4; }
 .website .keyboard-release { margin-top: 2px; }
 #keyboard-reminder { position: absolute; left: 50%; top: 50%; z-index: 2; transform: translate(-50%,-50%); width: max-content; max-width: calc(100% - 24px); transition: opacity 160ms ease-out; }
 #keyboard-reminder[data-fading="true"] { opacity: 0; }
 #keyboard-reminder strong { display: block; }
-#keyboard-reminder kbd { color: #faf9f6; }
+.website #keyboard-guide kbd, #keyboard-reminder kbd { color: #f7931a; }
 #keyboard-reminder button { position: absolute; inset: 0; width: 100%; border: 0; border-radius: inherit; background: transparent; }
 @media (prefers-reduced-motion: reduce) { #keyboard-reminder { transition: none; } }
 .website .camera-card { width: min(440px,100%); padding: 16px; }

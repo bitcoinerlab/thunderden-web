@@ -69,7 +69,8 @@ function setExpanded(expanded, restoreFocus = true) {
     scene.setAttribute('role', 'dialog');
     scene.setAttribute('aria-modal', 'true');
     scene.setAttribute('aria-owns', 'camera-panel');
-    exitButton.focus({ preventScroll: true });
+    const target = screen.dataset.ready === 'true' && !screen.inert ? screen : exitButton;
+    target.focus({ preventScroll: true });
   } else {
     scene.removeAttribute('role');
     scene.removeAttribute('aria-modal');

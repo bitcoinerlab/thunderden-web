@@ -120,11 +120,6 @@ with sync_playwright() as pw:
             assert abs(guide['x']+guide['width']/2-screen['x']-screen['width']/2)<.5,(screen,guide)
             assert abs(guide['y']+guide['height']/2-screen['y']-screen['height']/2)<.5,(screen,guide)
             page.screenshot(path=str(out/f'website-ready-{sample_width}x{sample_height}.png'))
-        page.locator('#expand-demo').click()
-        assert page.locator('#keyboard-prompt').is_visible()
-        assert page.locator('#screen').get_attribute('data-ready')=='true'
-        page.screenshot(path=str(out/'website-ready-expanded.png'))
-        page.keyboard.press('F8')
         page.set_viewport_size({'width':width,'height':height})
         page.evaluate('scrollTo(0,0)')
         page.evaluate("""async () => {
@@ -194,11 +189,19 @@ with sync_playwright() as pw:
         assert reminder.is_visible(),'A screen click after a key must show the reminder immediately'
         page.keyboard.press('1')
         wait_guest('Start a session')
+        before_expand=page.evaluate('siteInput.length')
         page.locator('#expand-demo').click()
         assert page.locator('body').get_attribute('data-demo-expanded')=='true'
         assert page.locator('#screen').get_attribute('data-ready')=='true'
-        page.locator('#screen').click()
-        assert reminder.is_hidden(),'A click to recapture keyboard control must not show the reminder'
+        assert page.locator('#screen').evaluate('screen=>document.activeElement===screen'),'Expanding must focus the ready guest without another click'
+        assert page.locator('#screen').get_attribute('data-keyboard')=='active'
+        assert page.locator('#keyboard-prompt').is_hidden()
+        assert reminder.is_hidden(),'Expanding must not show the mouse reminder'
+        assert page.evaluate('siteInput.length')==before_expand,'Expanding injected guest input'
+        page.screenshot(path=str(out/'expanded-keyboard-active.png'))
+        page.keyboard.press('ArrowDown')
+        page.wait_for_function('index=>siteInput.slice(index).some(event=>event.data.key.data==="down" && event.data.down)',arg=before_expand)
+        page.keyboard.press('ArrowUp')
         page.locator('#screen').click()
         assert reminder.is_visible(),'Reminder must work in the expanded display'
         page.wait_for_timeout(200)
@@ -226,6 +229,16 @@ with sync_playwright() as pw:
         assert page.locator('body').get_attribute('data-demo-expanded')=='false'
         assert not page.evaluate('index=>siteInput.slice(index).some(event=>event.data.key.data==="f8")',first_input)
         assert page.locator('#screen').get_attribute('data-ready')=='true'
+        assert page.locator('#screen').get_attribute('data-keyboard')=='released'
+        page.locator('#expand-demo').focus()
+        before_expand=page.evaluate('siteInput.length')
+        page.keyboard.press('Enter')
+        assert page.locator('#screen').evaluate('screen=>document.activeElement===screen')
+        assert page.locator('#screen').get_attribute('data-keyboard')=='active'
+        assert page.evaluate('siteInput.length')==before_expand,'The expansion activation key reached the guest'
+        page.keyboard.press('F8')
+        assert page.locator('body').get_attribute('data-demo-expanded')=='false'
+        assert page.evaluate('siteInput.length')==before_expand,'F8 reached the guest'
         wait_guest('Start a session')
         page.locator('#screen').click()
         page.keyboard.press('1')
@@ -237,6 +250,7 @@ with sync_playwright() as pw:
         page.screenshot(path=str(out/'camera-request.png'))
         page.locator('#expand-demo').click()
         assert page.locator('#camera-request').is_visible()
+        assert page.locator('#screen').evaluate('screen=>screen.inert && document.activeElement!==screen'),'Expansion must not bypass camera permission'
         page.screenshot(path=str(out/'camera-request-expanded.png'))
         page.keyboard.press('F8')
         assert page.evaluate('cameraCalls')==0
@@ -329,10 +343,14 @@ with sync_playwright() as pw:
         assert page.evaluate('cameraCalls')==0
         wait_guest('Choose a Bitcoin network')
         page.screenshot(path=str(out/'restarted.png'))
-        page.locator('#keyboard-prompt').click(position={'x':20,'y':20})
-        assert page.locator('#keyboard-prompt').is_hidden(),'Clicking the screen must activate the keyboard'
-        assert reminder.is_hidden(),'Initial mouse activation must not show the reminder'
+        page.locator('#expand-demo').click()
+        assert page.locator('#keyboard-prompt').is_hidden(),'Expanding a fresh ready guest must activate keyboard control'
+        assert page.locator('#screen').evaluate('screen=>document.activeElement===screen')
+        assert reminder.is_hidden(),'Expansion before first keyboard use must not show the reminder'
         assert page.locator('#screen').get_attribute('data-keyboard')=='active'
+        page.keyboard.press('F8')
+        page.locator('#screen').click()
+        assert reminder.is_hidden(),'Recapturing the keyboard must not show the reminder'
         page.locator('#screen').click()
         assert reminder.is_visible()
         page.locator('#intro-title').click()
@@ -355,6 +373,8 @@ with sync_playwright() as pw:
             'preview_collapses_without_stopping':True,'stop_available_when_collapsed':True,
             'power_restarts_without_confirmation':True,'restart_stops_camera_before_navigation':True,
             'expanded_esc_reaches_guest':True,'expanded_f8_exits_without_guest_input':True,
+            'expanded_focuses_ready_guest':True,'expansion_activation_key_isolated':True,
+            'expansion_preserves_camera_permission':True,
             'expanded_preserves_guest_and_capture':True,
             'phone_viewport':[375,547],
             'camera_calls':page.evaluate('cameraCalls'),'physical_camera_tested':False,
@@ -365,6 +385,7 @@ with sync_playwright() as pw:
         print('PASS: preview collapses without stopping capture; Show reuses it and Stop releases all tracks')
         print('PASS: laptop power button stops capture and restarts to the real network menu without confirmation')
         print('PASS: expanding preserves the guest/camera; Esc reaches Thunder Den and F8 exits without leaking a guest key')
+        print('PASS: expansion immediately captures the ready guest keyboard, isolates its activation key and does not bypass camera permission')
         print('PASS: further screen clicks dismiss the keyboard reminder; it reopens without a cooldown or stale timeout and dismissal preserves keyboard focus')
     except Exception:
         page.screenshot(path=str(out/'failure.png'))

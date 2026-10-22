@@ -63,8 +63,10 @@ loading presentation.
 
 There is no toolbar, keyboard-help footer or warning strip below the laptop. The
 initial in-screen prompt explains keyboard capture and release without a close
-icon: "Click the screen to control Thunder Den" and "Click outside the screen to
-use your keyboard normally again." Keep the prompt at most 440px wide, within
+icon: "Click the screen to enable keyboard control" and "Click outside the screen
+to release your keyboard." Before the key hints, say "Use your keyboard, not the
+mouse." Key symbols are orange; their explanatory text stays gray.
+Keep the prompt at most 440px wide, within
 the display's available space, and wrap naturally without shrinking the font.
 Keyboard, camera and diagnostics dialogs use 18px headings and 16px body text and
 key hints. They share a charcoal background, nearly square corners, a thin orange
@@ -80,8 +82,8 @@ After keyboard capture, additional primary clicks on the guest display show a
 small "Use your keyboard, not the mouse" reminder with arrow, Enter, Esc and
 number-key guidance. It fades out after six seconds or disappears immediately on
 keyboard input, loss of focus or a click on the reminder or the rest of the guest
-display. A small close cue appears at its top right. A click while the reminder
-is visible only dismisses it; it does not reopen it
+display. A small orange close cue appears at its top right. A click while the
+reminder is visible only dismisses it; it does not reopen it
 or renew the timeout. A later screen click can show it again without a cooldown.
 Dismissal within the display keeps keyboard capture and does not inject guest
 input. It never pauses the guest. The reminder stays within the display in
@@ -89,9 +91,16 @@ normal and expanded views and has no fade when reduced motion is requested. The
 standalone Preview 8 is unchanged.
 
 "Expand demo" sits just above the laptop frame, aligned with its right edge.
+It uses 13px Inter text and an 18px icon, with a minimum 44px click target. The
+icon and border turn orange on hover and visible keyboard focus; the text stays
+graphite over a white background, without a shadow.
 It opens an in-page view of the display rather than browser fullscreen or an
 enlarged decorative keyboard. Its only header control is "Back to website", with
 F8 as a keyboard exit even when the guest owns Tab. Esc continues to reach Thunder Den.
+Entering the expanded view focuses the ready guest display so keyboard control
+works without another click. During startup or a pending camera-permission step,
+focus stays on the expanded view controls instead; expansion never requests or
+bypasses camera permission.
 The same canvas, guest and camera stream remain active. Returning restores the
 page position and focus. Other page controls are inert while expanded. Resizing
 to a product-only narrow layout exits this view and cancels capture normally.
