@@ -12,6 +12,7 @@ const types = {
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.jpg': 'image/jpeg',
   '.wasm': 'application/wasm',
   '.woff2': 'font/woff2',
   '.ttf': 'font/ttf',

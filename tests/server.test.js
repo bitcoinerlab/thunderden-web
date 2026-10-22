@@ -48,6 +48,31 @@ test('serve the page with shared-memory headers but not files outside web/', asy
       assert.equal(nested.headers.get('cross-origin-opener-policy'), 'same-origin');
       assert.match(await nested.text(), /Thunder Den/);
     }
+    const website = await fetch(base + '/site/');
+    const html = await website.text();
+    const metadata = Object.fromEntries([...html.matchAll(/<meta (?:property|name)="([^"]+)" content="([^"]*)">/g)]
+      .map(([, name, content]) => [name, content]));
+    const title = 'Bitcoin Core-powered signer in your browser';
+    const description = 'An air-gapped, stateless Bitcoin signer for spare or old laptops. Boots from USB.';
+    const image = 'https://thunderden.com/site/social-preview.jpg';
+    for (const [name, value] of Object.entries({
+      'og:type': 'website', 'og:site_name': 'Thunder Den', 'og:url': 'https://thunderden.com/',
+      'og:title': title, 'og:description': description, 'og:image': image,
+      'og:image:type': 'image/jpeg', 'og:image:width': '1200', 'og:image:height': '600',
+      'twitter:card': 'summary_large_image', 'twitter:title': title,
+      'twitter:description': description, 'twitter:image': image,
+    })) assert.equal(metadata[name], value, name);
+    assert.ok(metadata['og:image:alt']);
+    assert.equal(metadata['twitter:image:alt'], metadata['og:image:alt']);
+    assert.equal(metadata['twitter:player'], undefined);
+    assert.match(html, /<title>Thunder Den - A Bitcoin signer<\/title>/);
+    assert.equal(metadata.description, 'Turn an old laptop into a Bitcoin signer. Explore the real Thunder Den software in your browser with public demo data.');
+    const preview = await fetch(base + new URL(image).pathname);
+    assert.equal(preview.status, 200);
+    assert.equal(preview.headers.get('content-type'), 'image/jpeg');
+    const jpeg = new Uint8Array(await preview.arrayBuffer());
+    assert.deepEqual([...jpeg.slice(0, 3)], [0xff, 0xd8, 0xff]);
+    assert.ok(jpeg.length < 5 * 1024 * 1024);
     const font = await fetch(base + '/fonts/InterVariable.woff2');
     assert.equal(font.headers.get('content-type'), 'font/woff2');
     assert.equal(new TextDecoder().decode((await font.arrayBuffer()).slice(0, 4)), 'wOF2');
