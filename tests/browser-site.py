@@ -73,6 +73,9 @@ with sync_playwright() as pw:
             assert page.locator('.demo-footer, .website .warning, #about').count()==0
             assert page.locator('#device #restart').get_attribute('aria-label')=='Restart demo'
             assert page.locator('#camera-panel #camera').count()==1
+            assert page.locator('.details-heading > p:not(.eyebrow)').all_text_contents()==[
+                'Thunder Den is an offline Bitcoin signer: it uses your secret keys to approve payments without going online. Keeping those keys off your everyday phone or computer reduces their exposure to malware and online theft.',
+                'A hardware wallet is one way to keep signing separate. Thunder Den uses a laptop you already own. Start it from a USB drive that contains only software, then enter your recovery words to load your keys into memory. Each session starts fresh. Only your wallet app stays online and exchanges data with Thunder Den through QR codes, without a cable or wireless connection.']
             warning=page.locator('#demo-warning')
             assert warning.count()==1
             assert warning.inner_text()=="LIVE DEMO: DON'T USE REAL FUNDS"

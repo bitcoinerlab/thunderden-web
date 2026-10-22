@@ -216,8 +216,10 @@ offline signer uses secret keys to approve payments without going online. Keepin
 keys off everyday connected devices reduces exposure to malware and online theft.
 Hardware wallets are one approach. Thunder Den starts a visitor's laptop from USB instead of its
 usual operating system. Introduce the USB as the carrier for the software before
-discussing builds. Recovery words and keys are used in memory for the session;
-the wallet app stays online while the laptop signs offline.
+discussing builds. Explain that entering recovery words loads the keys into
+memory, then say "Each session starts fresh" without introducing technical terms.
+Only the wallet app stays online; it exchanges data with Thunder Den through QR
+codes, without a cable or wireless connection.
 
 Follow with four short sections in a two-column grid and links to the technical
 material:
