@@ -52,8 +52,8 @@ test('serve the page with shared-memory headers but not files outside web/', asy
     const html = await website.text();
     const metadata = Object.fromEntries([...html.matchAll(/<meta (?:property|name)="([^"]+)" content="([^"]*)">/g)]
       .map(([, name, content]) => [name, content]));
-    const title = 'Bitcoin Core-powered signer in your browser';
-    const description = 'An air-gapped, stateless Bitcoin signer for spare or old laptops. Boots from USB.';
+    const title = 'Thunder Den: turn an old laptop into a Bitcoin signer';
+    const description = 'Boot from USB. Powered by Bitcoin Core, with no internet or disk access. Review and sign transactions from your wallet app using QR codes.';
     const image = 'https://thunderden.com/site/social-preview.jpg';
     for (const [name, value] of Object.entries({
       'og:type': 'website', 'og:site_name': 'Thunder Den', 'og:url': 'https://thunderden.com/',
@@ -65,8 +65,8 @@ test('serve the page with shared-memory headers but not files outside web/', asy
     assert.ok(metadata['og:image:alt']);
     assert.equal(metadata['twitter:image:alt'], metadata['og:image:alt']);
     assert.equal(metadata['twitter:player'], undefined);
-    assert.match(html, /<title>Thunder Den - A Bitcoin signer<\/title>/);
-    assert.equal(metadata.description, 'Turn an old laptop into a Bitcoin signer. Explore the real Thunder Den software in your browser with public demo data.');
+    assert.equal(html.match(/<title>([^<]*)<\/title>/)?.[1], title);
+    assert.equal(metadata.description, description);
     const preview = await fetch(base + new URL(image).pathname);
     assert.equal(preview.status, 200);
     assert.equal(preview.headers.get('content-type'), 'image/jpeg');

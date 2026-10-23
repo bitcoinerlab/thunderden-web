@@ -149,9 +149,9 @@ Follow [thunderden-brand](https://github.com/bitcoinerlab/thunderden-brand):
 The homepage defines static Open Graph and Twitter Card metadata, without a
 separate sharing route. Both use `site/social-preview.jpg`, a 1200x600 image of
 the browser demo with the full virtual laptop and public test QR data. X is
-configured for a large-image card, not a video or interactive player. The social
-title and description are separate from the normal HTML title and description;
-the visible page stays unchanged. Card rendering and caching are controlled by
+configured for a large-image card, not a video or interactive player. HTML,
+Open Graph and Twitter use the same project-focused title and description;
+the page body stays unchanged. Card rendering and caching are controlled by
 the sharing platform. The browser demo is not an air-gapped device.
 
 ## Phone companion
