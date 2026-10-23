@@ -54,7 +54,7 @@ test('serve the page with shared-memory headers but not files outside web/', asy
       .map(([, name, content]) => [name, content]));
     const title = 'Thunder Den: turn an old laptop into a Bitcoin signer';
     const description = 'Boot from USB. Powered by Bitcoin Core, with no internet or disk access. Review and sign transactions from your wallet app using QR codes.';
-    const image = 'https://thunderden.com/site/social-preview.jpg';
+    const image = 'https://thunderden.com/site/social-preview.jpg?v=2';
     for (const [name, value] of Object.entries({
       'og:type': 'website', 'og:site_name': 'Thunder Den', 'og:url': 'https://thunderden.com/',
       'og:title': title, 'og:description': description, 'og:image': image,
@@ -67,7 +67,8 @@ test('serve the page with shared-memory headers but not files outside web/', asy
     assert.equal(metadata['twitter:player'], undefined);
     assert.equal(html.match(/<title>([^<]*)<\/title>/)?.[1], title);
     assert.equal(metadata.description, description);
-    const preview = await fetch(base + new URL(image).pathname);
+    const imageUrl = new URL(image);
+    const preview = await fetch(base + imageUrl.pathname + imageUrl.search);
     assert.equal(preview.status, 200);
     assert.equal(preview.headers.get('content-type'), 'image/jpeg');
     const jpeg = new Uint8Array(await preview.arrayBuffer());

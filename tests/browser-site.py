@@ -108,12 +108,20 @@ with sync_playwright() as pw:
                 assert page.locator('#phone-demo > p').inner_text()=='Open thunderden.com on a laptop or desktop to try it in your browser. No USB drive needed.'
                 preview=page.locator('#phone-demo img')
                 assert preview.is_visible()
-                assert preview.get_attribute('src')=='./site/social-preview.jpg'
+                assert preview.get_attribute('src')=='./site/social-preview.jpg?v=2'
                 assert preview.get_attribute('loading')=='lazy'
                 page.wait_for_function('''() => {
                     const image=document.querySelector('#phone-demo img');
                     return image.complete && image.naturalWidth===1200 && image.naturalHeight===600;
                 }''')
+                assert preview.evaluate('''image=>{
+                    const canvas=document.createElement('canvas');
+                    canvas.width=1;canvas.height=1;
+                    const context=canvas.getContext('2d');
+                    context.drawImage(image,0,image.naturalHeight-1,image.naturalWidth,1,0,0,1,1);
+                    const pixel=context.getImageData(0,0,1,1).data;
+                    return Math.min(pixel[0],pixel[1],pixel[2])>230;
+                }'''),'The preview must not retain a dark capture border at the bottom'
                 bounds=preview.bounding_box()
                 assert abs(bounds['width']/bounds['height']-2)<.01,bounds
                 assert bounds['width']<=page.locator('#phone-demo').bounding_box()['width'],bounds
