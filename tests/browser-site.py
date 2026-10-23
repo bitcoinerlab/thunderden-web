@@ -104,8 +104,8 @@ with sync_playwright() as pw:
                 assert page.locator('.demo-note').is_hidden()
                 assert page.locator('#device').is_hidden()
                 assert page.locator('.companion-card').is_hidden()
-                assert page.locator('#phone-demo-title').inner_text()=='Try Thunder Den on a computer'
-                assert page.locator('#phone-demo > p').inner_text()=='Open thunderden.com on a laptop or desktop to try it in your browser. No USB drive needed.'
+                assert page.locator('#phone-demo-title').inner_text()=='Try the browser demo on a computer'
+                assert page.locator('#phone-demo > p').inner_text()=='Open thunderden.com on a computer to try it on a virtual laptop before preparing a USB drive.'
                 preview=page.locator('#phone-demo img')
                 assert preview.is_visible()
                 assert preview.get_attribute('src')=='./site/social-preview.jpg?v=2'
