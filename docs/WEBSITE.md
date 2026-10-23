@@ -41,9 +41,12 @@ automatically, including on touch-only tablets.
 
 At widths below 768px, or below 1000px with at most 500px height, show a
 product-only homepage regardless of input device. Keep the introduction and
-details, but show no laptop, QR panel, start button or demo-wallet button.
-Instead, a quiet note says "Try it before preparing a USB drive" and "Open
-thunderden.com on a computer to try the live browser demo. No USB drive needed."
+details, but hide the interactive laptop, QR panel, start and demo-wallet buttons.
+Instead, a note says "Try Thunder Den on a computer" and "Open thunderden.com on
+a laptop or desktop to try it in your browser. No USB drive needed." A static
+preview below the text reuses the social image, with its full virtual laptop and
+keyboard. It has no play button or other interaction. The preview image loads
+lazily, fits the available width and stays hidden on computer demo layouts.
 The phone wallet remains available via the computer demo's QR and direct URL.
 
 Fresh visits in these narrow layouts do not download or start the emulator.

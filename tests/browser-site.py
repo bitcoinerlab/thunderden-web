@@ -104,8 +104,19 @@ with sync_playwright() as pw:
                 assert page.locator('.demo-note').is_hidden()
                 assert page.locator('#device').is_hidden()
                 assert page.locator('.companion-card').is_hidden()
-                assert page.locator('#phone-demo-title').inner_text()=='Try it before preparing a USB drive'
-                assert 'live browser demo. No USB drive needed.' in page.locator('#phone-demo').inner_text()
+                assert page.locator('#phone-demo-title').inner_text()=='Try Thunder Den on a computer'
+                assert page.locator('#phone-demo > p').inner_text()=='Open thunderden.com on a laptop or desktop to try it in your browser. No USB drive needed.'
+                preview=page.locator('#phone-demo img')
+                assert preview.is_visible()
+                assert preview.get_attribute('src')=='./site/social-preview.jpg'
+                assert preview.get_attribute('loading')=='lazy'
+                page.wait_for_function('''() => {
+                    const image=document.querySelector('#phone-demo img');
+                    return image.complete && image.naturalWidth===1200 && image.naturalHeight===600;
+                }''')
+                bounds=preview.bounding_box()
+                assert abs(bounds['width']/bounds['height']-2)<.01,bounds
+                assert bounds['width']<=page.locator('#phone-demo').bounding_box()['width'],bounds
                 assert not page.locator('#phone-demo a, #phone-demo button').count()
                 assert page.locator('#status').inner_text()=='Live demo available on a computer.'
                 assert page.locator('#details-title').is_visible()
@@ -138,6 +149,7 @@ with sync_playwright() as pw:
                     assert len(pending)==2,'Returning to a wide touch layout must not restart the demo'
                 continue
             assert page.locator('#device').is_visible(), 'The laptop must not disappear at a breakpoint'
+            assert page.locator('#phone-demo').is_hidden()
             assert page.locator('#demo-title').inner_text()=='TRY THUNDER DEN IN YOUR BROWSER'
             assert page.locator('.demo-heading p').inner_text()=='The real USB image, running locally on a virtual computer.'
             assert page.locator('.scene #expand-demo').is_visible()

@@ -158,6 +158,7 @@ body.website, body.wallet-page {
 .phone-demo-message { display: none; width: min(560px,100%); margin-inline: auto; padding: 20px 0; border-block: 1px solid #dedfd8; }
 .phone-demo-message h2 { margin: 0 0 10px; font-size: 20px; line-height: 1.3; font-weight: 600; letter-spacing: -.025em; }
 .phone-demo-message p { margin: 0; color: #686b63; line-height: 1.7; }
+.phone-demo-message img { display: block; width: 100%; height: auto; margin-top: 16px; }
 .site-details { max-width: 1120px; margin: 0 auto; padding: 48px 32px 64px; scroll-margin-top: 24px; }
 .details-heading { max-width: 760px; margin-bottom: 54px; }
 .details-heading h2, .get-started h2 { margin: 0 0 14px; font-size: clamp(27px,3vw,38px); line-height: 1.2; letter-spacing: -.035em; font-weight: 600; }
